@@ -1,0 +1,896 @@
+@import './tokens.css';
+
+/* =========================================================================
+   RESETS E ESTILOS GLOBAIS
+   ========================================================================= */
+* {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+html {
+  font-size: 16px;
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  font-family: var(--font-family-base);
+  background-color: var(--color-bg-app);
+  color: var(--color-text-primary);
+  line-height: 1.5;
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  justify-content: center;
+  align-items: stretch;
+  overflow-x: hidden;
+}
+
+#root {
+  width: 100%;
+  display: flex;
+  justify-content: center;
+}
+
+/* Foco visível acessível em todos os elementos interativos */
+:focus-visible {
+  outline: var(--focus-ring);
+  outline-offset: var(--focus-offset);
+}
+
+button {
+  font-family: inherit;
+  border: none;
+  background: none;
+  cursor: pointer;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* Links e endereços simulados não clicáveis */
+.mock-unclickable-text,
+.mock-balloon-text {
+  word-break: break-word;
+  user-select: text;
+}
+
+/* =========================================================================
+   CONTAINER DA APLICAÇÃO (MOBILE-FIRST, MÁXIMO 480PX)
+   ========================================================================= */
+.app-container {
+  width: 100%;
+  max-width: var(--app-max-width);
+  min-height: 100vh;
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: var(--space-4);
+  position: relative;
+  background-color: var(--color-bg-app);
+}
+
+/* =========================================================================
+   TELA 1: INÍCIO
+   ========================================================================= */
+.start-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-6);
+  padding: var(--space-6) var(--space-2);
+  animation: fadeIn 300ms ease-out;
+}
+
+.brand-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  padding: var(--space-2) var(--space-4);
+  background-color: var(--color-primary-subtle);
+  border: 1px solid var(--color-primary);
+  border-radius: var(--radius-full);
+  color: #A5B4FC;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.brand-icon {
+  font-size: 1.25rem;
+}
+
+.brand-title {
+  font-size: 1.85rem;
+  font-weight: 800;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--color-text-primary);
+}
+
+.brand-slogan {
+  font-size: 1.15rem;
+  font-weight: 600;
+  color: #818CF8;
+  margin-top: var(--space-1);
+}
+
+.start-description {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+  max-width: 380px;
+  line-height: 1.5;
+}
+
+.best-score-card {
+  width: 100%;
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  box-shadow: var(--shadow-sm);
+}
+
+.best-score-label {
+  font-size: 0.9rem;
+  color: var(--color-text-secondary);
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.best-score-value {
+  font-size: 1.35rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.btn-primary {
+  width: 100%;
+  min-height: var(--touch-target-min);
+  padding: var(--space-4);
+  background-color: var(--color-primary);
+  color: #FFFFFF;
+  border-radius: var(--radius-lg);
+  font-size: 1.1rem;
+  font-weight: 700;
+  box-shadow: var(--shadow-md);
+  transition: background-color 150ms ease, transform 150ms ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+}
+
+.btn-primary:hover {
+  background-color: var(--color-primary-hover);
+  transform: translateY(-1px);
+}
+
+.btn-primary:active {
+  transform: translateY(0);
+}
+
+/* =========================================================================
+   TELA 2: DESAFIO
+   ========================================================================= */
+.challenge-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-4);
+  animation: fadeIn 250ms ease-out;
+}
+
+/* Barra Superior de Status */
+.challenge-topbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-2) 0;
+  border-bottom: 1px solid var(--color-border);
+}
+
+.stats-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+
+.stat-item {
+  display: flex;
+  flex-direction: column;
+}
+
+.stat-label {
+  font-size: 0.75rem;
+  color: var(--color-text-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.05em;
+  font-weight: 600;
+}
+
+.stat-value {
+  font-size: 1.15rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.stat-value--points {
+  color: #A5B4FC;
+}
+
+.btn-quit {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--color-text-secondary);
+  padding: var(--space-2) var(--space-3);
+  border-radius: var(--radius-md);
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  min-height: 40px;
+  display: inline-flex;
+  align-items: center;
+  transition: all 150ms ease;
+}
+
+.btn-quit:hover {
+  background-color: var(--color-bg-elevated);
+  color: var(--color-text-primary);
+  border-color: var(--color-border-hover);
+}
+
+/* Cabeçalho do Desafio */
+.challenge-prompt {
+  text-align: center;
+  padding: var(--space-1) 0;
+}
+
+.challenge-prompt h2 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: var(--color-text-primary);
+}
+
+.challenge-prompt p {
+  font-size: 0.85rem;
+  color: var(--color-text-secondary);
+}
+
+/* Contêiner do Mock */
+.mock-container {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  min-height: 280px;
+}
+
+/* =========================================================================
+   ESTILOS DOS MOCKS REALISTAS
+   ========================================================================= */
+.mock-card {
+  width: 100%;
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-md);
+  border: 1px solid var(--color-border);
+  display: flex;
+  flex-direction: column;
+}
+
+.mock-avatar {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 1rem;
+  flex-shrink: 0;
+}
+
+/* WhatsApp Mock */
+.mock-whatsapp {
+  background-color: #0B141A;
+}
+
+.mock-whatsapp-header {
+  background-color: #202C33;
+  padding: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border-bottom: 1px solid #2A3942;
+}
+
+.mock-whatsapp-avatar {
+  background-color: #374248;
+  color: #E9EDEF;
+  font-size: 1.3rem;
+}
+
+.mock-whatsapp .mock-sender-name {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: #E9EDEF;
+}
+
+.mock-whatsapp .mock-sender-status {
+  font-size: 0.75rem;
+  color: #8696A0;
+}
+
+.mock-whatsapp-body {
+  padding: var(--space-4) var(--space-3);
+  min-height: 180px;
+  background-color: #0B141A;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+}
+
+.mock-whatsapp-balloon {
+  background-color: #202C33;
+  color: #E9EDEF;
+  padding: var(--space-3) var(--space-3) var(--space-2);
+  border-radius: 12px 12px 12px 2px;
+  max-width: 92%;
+  align-self: flex-start;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
+}
+
+.mock-balloon-sender {
+  font-size: 0.75rem;
+  font-weight: 700;
+  color: #25D366;
+  margin-bottom: var(--space-1);
+}
+
+.mock-balloon-text {
+  font-size: 0.92rem;
+  line-height: 1.45;
+  white-space: pre-wrap;
+}
+
+.mock-balloon-meta {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.mock-balloon-time {
+  font-size: 0.7rem;
+  color: #8696A0;
+}
+
+.mock-balloon-ticks {
+  font-size: 0.75rem;
+  color: #53BDEB;
+}
+
+/* SMS Mock */
+.mock-sms {
+  background-color: #121214;
+}
+
+.mock-sms-header {
+  background-color: #1C1C1E;
+  padding: var(--space-3);
+  text-align: center;
+  border-bottom: 1px solid #2C2C2E;
+}
+
+.mock-sms-sender-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  background-color: #2C2C2E;
+  padding: var(--space-1) var(--space-3);
+  border-radius: var(--radius-full);
+}
+
+.mock-sms-sender {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #F2F2F7;
+}
+
+.mock-sms-body {
+  padding: var(--space-4) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.mock-sms-timestamp {
+  text-align: center;
+  font-size: 0.72rem;
+  color: #8E8E93;
+}
+
+.mock-sms-balloon {
+  background-color: #2C2C2E;
+  color: #FFFFFF;
+  padding: var(--space-3);
+  border-radius: 16px;
+  max-width: 90%;
+  align-self: flex-start;
+}
+
+/* Email Mock */
+.mock-email {
+  background-color: #1A1F2C;
+}
+
+.mock-email-header {
+  background-color: #1E2538;
+  padding: var(--space-3);
+  border-bottom: 1px solid #2D3748;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.mock-email-subject-line {
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-2);
+}
+
+.mock-email-subject {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #F8FAFC;
+  line-height: 1.35;
+}
+
+.mock-email-sender-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  margin-top: var(--space-1);
+}
+
+.mock-email-avatar {
+  background-color: #4F46E5;
+  color: #FFFFFF;
+}
+
+.mock-email-from-name {
+  font-size: 0.88rem;
+  font-weight: 600;
+  color: #F1F5F9;
+}
+
+.mock-email-from-address {
+  font-size: 0.78rem;
+  color: #94A3B8;
+}
+
+.mock-email-date {
+  font-size: 0.72rem;
+  color: #64748B;
+}
+
+.mock-email-body {
+  padding: var(--space-4);
+  background-color: #161A26;
+}
+
+.mock-email-content-text {
+  font-size: 0.9rem;
+  color: #E2E8F0;
+  line-height: 1.55;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+
+/* Instagram Mock */
+.mock-instagram {
+  background-color: #121212;
+}
+
+.mock-instagram-header {
+  background-color: #1A1A1A;
+  padding: var(--space-3);
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  border-bottom: 1px solid #262626;
+}
+
+.mock-instagram-avatar-ring {
+  padding: 2px;
+  background: linear-gradient(45deg, #F58529, #DD2A7B, #8134AF);
+  border-radius: var(--radius-full);
+}
+
+.mock-instagram-avatar {
+  background-color: #262626;
+  color: #FFFFFF;
+}
+
+.mock-instagram-username-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.mock-instagram-username {
+  font-size: 0.9rem;
+  font-weight: 700;
+  color: #FFFFFF;
+}
+
+.mock-instagram-badge--verified {
+  background-color: #0095F6;
+  color: #FFFFFF;
+  border-radius: var(--radius-full);
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 900;
+}
+
+.mock-instagram-badge--unverified {
+  background-color: rgba(245, 158, 11, 0.2);
+  color: #FBBF24;
+  border: 1px solid rgba(245, 158, 11, 0.4);
+  font-size: 0.7rem;
+  padding: 1px 6px;
+  border-radius: var(--radius-full);
+  font-weight: 600;
+}
+
+.mock-instagram-followers-text {
+  font-size: 0.74rem;
+  color: #A8A8A8;
+}
+
+.mock-instagram-visual-box {
+  background-color: #1E1E1E;
+  min-height: 110px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  border-bottom: 1px solid #262626;
+  position: relative;
+  padding: var(--space-3);
+}
+
+.mock-instagram-promo-banner {
+  background-color: #E11D48;
+  color: #FFFFFF;
+  font-size: 0.75rem;
+  font-weight: 800;
+  padding: 3px 10px;
+  border-radius: var(--radius-full);
+  margin-bottom: var(--space-2);
+}
+
+.mock-instagram-visual-preview {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  color: #D4D4D4;
+  font-size: 0.9rem;
+  font-weight: 600;
+}
+
+.mock-instagram-visual-icon {
+  font-size: 1.5rem;
+}
+
+.mock-instagram-body {
+  padding: var(--space-3);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-2);
+}
+
+.mock-instagram-actions {
+  display: flex;
+  gap: var(--space-3);
+  font-size: 1.15rem;
+}
+
+.mock-instagram-caption {
+  font-size: 0.88rem;
+  line-height: 1.45;
+  color: #F5F5F5;
+}
+
+.mock-instagram-caption-author {
+  font-weight: 700;
+}
+
+.mock-instagram-comments-preview {
+  font-size: 0.78rem;
+  color: #737373;
+}
+
+.mock-instagram-time {
+  font-size: 0.7rem;
+  color: #737373;
+  text-transform: uppercase;
+}
+
+/* =========================================================================
+   BOTÕES DE AÇÃO DO DESAFIO (É GOLPE / É SEGURO)
+   ========================================================================= */
+.challenge-actions-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+  margin-top: auto;
+  padding-top: var(--space-2);
+}
+
+.btn-choice {
+  min-height: 54px;
+  padding: var(--space-3) var(--space-2);
+  border-radius: var(--radius-lg);
+  font-size: 1.05rem;
+  font-weight: 800;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  box-shadow: var(--shadow-sm);
+  transition: all 150ms ease;
+  cursor: pointer;
+}
+
+.btn-choice--scam {
+  background-color: var(--color-danger);
+  color: #FFFFFF;
+}
+
+.btn-choice--scam:hover:not(:disabled) {
+  background-color: var(--color-danger-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-choice--safe {
+  background-color: var(--color-success);
+  color: #FFFFFF;
+}
+
+.btn-choice--safe:hover:not(:disabled) {
+  background-color: var(--color-success-hover);
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-md);
+}
+
+.btn-choice:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+  transform: none;
+}
+
+/* =========================================================================
+   ÁREA DE FEEDBACK (IMEDIATO APÓS RESPONDER)
+   ========================================================================= */
+.feedback-card {
+  border-radius: var(--radius-lg);
+  padding: var(--space-4);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+  box-shadow: var(--shadow-md);
+  animation: slideUp 200ms ease-out;
+  border: 1px solid;
+}
+
+@keyframes slideUp {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.feedback-card--correct {
+  background-color: rgba(16, 185, 129, 0.12);
+  border-color: var(--color-success-border);
+}
+
+.feedback-card--incorrect {
+  background-color: rgba(239, 68, 68, 0.12);
+  border-color: var(--color-danger-border);
+}
+
+.feedback-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.feedback-title-group {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.feedback-icon {
+  font-size: 1.4rem;
+}
+
+.feedback-title {
+  font-size: 1.15rem;
+  font-weight: 800;
+}
+
+.feedback-card--correct .feedback-title {
+  color: #34D399;
+}
+
+.feedback-card--incorrect .feedback-title {
+  color: #F87171;
+}
+
+.feedback-points-tag {
+  font-size: 0.85rem;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: var(--radius-full);
+}
+
+.feedback-card--correct .feedback-points-tag {
+  background-color: rgba(16, 185, 129, 0.2);
+  color: #6EE7B7;
+}
+
+.feedback-card--incorrect .feedback-points-tag {
+  background-color: rgba(239, 68, 68, 0.2);
+  color: #FCA5A5;
+}
+
+.feedback-explanation {
+  font-size: 0.92rem;
+  line-height: 1.5;
+  color: var(--color-text-primary);
+  background-color: rgba(15, 23, 42, 0.6);
+  padding: var(--space-3);
+  border-radius: var(--radius-md);
+  border-left: 3px solid;
+}
+
+.feedback-card--correct .feedback-explanation {
+  border-left-color: var(--color-success);
+}
+
+.feedback-card--incorrect .feedback-explanation {
+  border-left-color: var(--color-danger);
+}
+
+.btn-next {
+  width: 100%;
+  min-height: var(--touch-target-min);
+  background-color: var(--color-primary);
+  color: #FFFFFF;
+  border-radius: var(--radius-md);
+  font-size: 1rem;
+  font-weight: 700;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  transition: background-color 150ms ease;
+  margin-top: var(--space-1);
+}
+
+.btn-next:hover {
+  background-color: var(--color-primary-hover);
+}
+
+/* =========================================================================
+   TELA 3: RESUMO
+   ========================================================================= */
+.summary-screen {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+  gap: var(--space-5);
+  padding: var(--space-6) var(--space-2);
+  animation: fadeIn 300ms ease-out;
+}
+
+.summary-header {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-2);
+}
+
+.summary-badge-icon {
+  font-size: 2.8rem;
+}
+
+.summary-title {
+  font-size: 1.6rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.summary-subtitle {
+  font-size: 0.95rem;
+  color: var(--color-text-secondary);
+}
+
+.summary-grid {
+  width: 100%;
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: var(--space-3);
+}
+
+.summary-card {
+  background-color: var(--color-bg-card);
+  border: 1px solid var(--color-border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-4) var(--space-3);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-1);
+}
+
+.summary-card--full {
+  grid-column: 1 / -1;
+  background-color: var(--color-bg-elevated);
+  border-color: #4338CA;
+}
+
+.summary-card-label {
+  font-size: 0.8rem;
+  color: var(--color-text-secondary);
+  font-weight: 600;
+}
+
+.summary-card-value {
+  font-size: 1.5rem;
+  font-weight: 800;
+  color: var(--color-text-primary);
+}
+
+.summary-card-value--highlight {
+  color: #A5B4FC;
+}
+
+.summary-card-value--record {
+  color: #FBBF24;
+}
+
+/* Animação fade in */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(4px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+

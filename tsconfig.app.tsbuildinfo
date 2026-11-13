@@ -1,0 +1,1 @@
+{"root":["./src/app.tsx","./src/config.ts","./src/main.tsx","./src/components/mocks/emailmock.tsx","./src/components/mocks/instagrammock.tsx","./src/components/mocks/smsmock.tsx","./src/components/mocks/whatsappmock.tsx","./src/data/challenges.ts","./src/services/storage.ts"],"version":"5.9.3"}
