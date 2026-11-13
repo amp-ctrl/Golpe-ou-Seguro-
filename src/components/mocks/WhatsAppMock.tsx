@@ -7,32 +7,58 @@ interface Props {
 
 export const WhatsAppMock: React.FC<Props> = ({ content }) => {
   return (
-    <div className="mock-card mock-whatsapp" aria-label="Simulação de mensagem do WhatsApp">
-      {/* Barra superior de conversa */}
-      <div className="mock-header mock-whatsapp-header">
-        <div className="mock-avatar mock-whatsapp-avatar">
-          <span>{content.avatarText}</span>
-        </div>
-        <div className="mock-sender-info">
-          <div className="mock-sender-name">
-            {content.isGroup ? content.groupName : content.senderName}
+    <div className="mock-device-screen mock-whatsapp" aria-label="Simulação de mensagem do WhatsApp">
+      {/* Barra do App WhatsApp */}
+      <div className="wa-topbar">
+        <div className="wa-topbar-left">
+          <svg className="wa-icon-back" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <polyline points="15 18 9 12 15 6" />
+          </svg>
+          <div className="wa-avatar">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2" />
+              <circle cx="12" cy="7" r="4" />
+            </svg>
           </div>
-          {content.senderStatus && (
-            <div className="mock-sender-status">{content.senderStatus}</div>
-          )}
+          <div className="wa-contact-info">
+            <span className="wa-contact-name">
+              {content.isGroup ? content.groupName : content.senderName}
+            </span>
+            {content.senderStatus && (
+              <span className="wa-contact-status">{content.senderStatus}</span>
+            )}
+          </div>
+        </div>
+
+        <div className="wa-topbar-actions" aria-hidden="true">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z" />
+          </svg>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+            <circle cx="12" cy="12" r="1" />
+            <circle cx="12" cy="5" r="1" />
+            <circle cx="12" cy="19" r="1" />
+          </svg>
         </div>
       </div>
 
-      {/* Área da conversa com balão */}
-      <div className="mock-body mock-whatsapp-body">
-        <div className="mock-balloon mock-whatsapp-balloon">
+      {/* Área da conversa com balão de mensagem */}
+      <div className="wa-chat-area">
+        <div className="wa-date-divider">
+          <span>HOJE</span>
+        </div>
+
+        <div className="wa-balloon">
           {content.isGroup && (
-            <div className="mock-balloon-sender">{content.senderName}</div>
+            <span className="wa-balloon-author">{content.senderName}</span>
           )}
-          <p className="mock-balloon-text">{content.messageText}</p>
-          <div className="mock-balloon-meta">
-            <span className="mock-balloon-time">{content.time}</span>
-            <span className="mock-balloon-ticks" aria-hidden="true">✓✓</span>
+          <p className="wa-balloon-text mock-balloon-text">{content.messageText}</p>
+          <div className="wa-balloon-meta">
+            <span className="wa-balloon-time">{content.time}</span>
+            <svg className="wa-checks" viewBox="0 0 18 12" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+              <path d="M1 6l4 4L14 1" />
+              <path d="M5 6l4 4L18 1" />
+            </svg>
           </div>
         </div>
       </div>
