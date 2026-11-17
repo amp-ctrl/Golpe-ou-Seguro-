@@ -23,7 +23,7 @@
 /* Texto escuro sobre verde preserva a cor existente e atende contraste AA. */
 .btn-choice--safe { color: var(--color-bg-screen); }
 .btn-choice--safe:hover:not(:disabled) { color: var(--color-bg-screen); background: var(--color-success); border-color: var(--color-text-primary); }
-.stat-label, .best-score-inline { color: var(--color-text-secondary); }
+.stat-label { color: var(--color-text-secondary); }
 .sms-delivery-note, .email-date-text, .email-to-line, .ig-comments-link, .ig-time-stamp { color: var(--color-text-secondary); }
 
 @media (min-width: 1024px) {

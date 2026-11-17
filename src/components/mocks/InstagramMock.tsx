@@ -19,20 +19,6 @@ export const InstagramMock: React.FC<Props> = ({ content }) => {
           <div className="ig-user-meta">
             <div className="ig-username-line">
               <span className="ig-username">{content.username}</span>
-              {content.isVerified ? (
-                <svg className="ig-badge-verified" viewBox="0 0 24 24" fill="currentColor" aria-label="Perfil verificado">
-                  <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-1.2 14.6l-3.8-3.8 1.4-1.4 2.4 2.4 5.4-5.4 1.4 1.4-6.8 6.8z" />
-                </svg>
-              ) : (
-                <span className="ig-badge-unverified" aria-label="Não verificado">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                    <path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z" />
-                    <line x1="12" y1="9" x2="12" y2="13" />
-                    <line x1="12" y1="17" x2="12.01" y2="17" />
-                  </svg>
-                  <span>Não verificado</span>
-                </span>
-              )}
             </div>
             <span className="ig-followers-text">{content.followersText}</span>
           </div>

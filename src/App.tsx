@@ -4,7 +4,8 @@ import { POINTS_PER_CORRECT_ANSWER, POINTS_PER_WRONG_ANSWER } from './config';
 import { storage } from './services/storage';
 
 import { ChallengeMock } from './components/ChallengeMock';
-import { buildSession, SESSION_SIZES, type SessionSize } from './services/sessionBuilder';
+import { StartScreen } from './components/StartScreen';
+import { buildSession, type SessionSize } from './services/sessionBuilder';
 
 type Screen = 'start' | 'playing' | 'summary';
 
@@ -115,95 +116,9 @@ export const App: React.FC = () => {
 
   return (
     <div className={`app-container ${screen === 'start' ? 'app-container--start' : ''}`}>
-      {/* ===================================================================
-          TELA 1: INÍCIO (OPÇÃO A: O PRÓPRIO JOGO COMO PROTAGONISTA)
-          =================================================================== */}
       {screen === 'start' && (
-        <section className="start-screen" aria-label="Tela Inicial">
-          {/* Coluna da Esquerda: Textos e Ação */}
-          <div className="start-content-column">
-            <div className="start-text-group">
-              <h1 className="brand-title">Consumo Impulsivo e Golpes Digitais</h1>
-              <p className="brand-slogan">Treine para não cair</p>
-              <p className="start-description">
-                Analise mensagens que imitam apps do dia a dia e decida se cada uma é um <strong>golpe</strong> ou se é <strong>segura</strong>.
-              </p>
-            </div>
-
-            <div className="start-action-group">
-              <fieldset className="session-size-picker">
-                <legend>Questões por partida</legend>
-                <div className="session-size-options">
-                  {SESSION_SIZES.map((size) => (
-                    <label key={size}>
-                      <input type="radio" name="session-size" value={size} checked={sessionSize === size} onChange={() => setSessionSize(size)} />
-                      <span>{size}</span>
-                    </label>
-                  ))}
-                </div>
-              </fieldset>
-              {startError && <p role="alert">{startError}</p>}
-              <button
-                type="button"
-                className="btn-primary btn-start"
-                onClick={handleStartGame}
-              >
-                <span>Começar treino</span>
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <line x1="5" y1="12" x2="19" y2="12" />
-                  <polyline points="12 5 19 12 12 19" />
-                </svg>
-              </button>
-
-              <div className="best-score-inline">
-                <svg className="score-icon-inline" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
-                  <path d="M6 9H4.5a2.5 2.5 0 0 1 0-5H6" />
-                  <path d="M18 9h1.5a2.5 2.5 0 0 0 0-5H18" />
-                  <path d="M4 22h16" />
-                  <path d="M10 14.66V17c0 .55-.45 1-1 1H8c-.55 0-1 .45-1 1v1h10v-1c0-.55-.45-1-1-1h-1c-.55 0-1-.45-1-1v-2.34" />
-                  <path d="M18 2H6v7a6 6 0 0 0 12 0V2z" />
-                </svg>
-                <span className="best-score-label">Melhor pontuação salva</span>
-                <span className="best-score-separator" aria-hidden="true">•</span>
-                <span className="best-score-value">{bestScore} pts</span>
-              </div>
-            </div>
-          </div>
-
-          {/* Coluna da Direita (Desktop) / Abaixo (Mobile): Preview Realista do Mock */}
-          <div className="start-preview-column" aria-hidden="true">
-            <div className="device-chassis device-chassis--preview">
-              <div className="device-status-bar">
-                <span className="device-clock">14:32</span>
-                <div className="device-camera-notch" />
-                <div className="device-indicators">
-                  <svg viewBox="0 0 24 24" fill="currentColor">
-                    <rect x="2" y="16" width="3" height="6" rx="1" />
-                    <rect x="7" y="12" width="3" height="10" rx="1" />
-                    <rect x="12" y="8" width="3" height="14" rx="1" />
-                    <rect x="17" y="4" width="3" height="18" rx="1" />
-                  </svg>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-                    <path d="M5 12.55a11 11 0 0 1 14.08 0" />
-                    <path d="M1.42 9a16 16 0 0 1 21.16 0" />
-                    <path d="M8.53 16.11a6 6 0 0 1 6.95 0" />
-                    <line x1="12" y1="20" x2="12.01" y2="20" />
-                  </svg>
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round">
-                    <rect x="1" y="6" width="18" height="12" rx="2" />
-                    <line x1="23" y1="11" x2="23" y2="13" />
-                    <rect x="3" y="8" width="11" height="8" fill="currentColor" />
-                  </svg>
-                </div>
-              </div>
-              <div className="device-screen-content">
-                <ChallengeMock challenge={INITIAL_CHALLENGES[0]} />
-              </div>
-            </div>
-          </div>
-        </section>
+        <StartScreen bestScore={bestScore} sessionSize={sessionSize} onSessionSizeChange={setSessionSize} onStart={handleStartGame} error={startError} />
       )}
-
       {/* ===================================================================
           TELA 2: PARTIDA + FEEDBACK
           =================================================================== */}
