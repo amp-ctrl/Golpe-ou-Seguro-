@@ -1,0 +1,53 @@
+/* Partidas: controles, progresso e distribuição do espaço sem alterar a paleta. */
+.session-size-picker { border: 0; min-width: 0; width: 100%; }
+.session-size-picker legend { color: var(--color-text-secondary); margin-bottom: var(--space-2); }
+.session-size-options { display: flex; flex-wrap: wrap; gap: var(--space-2); }
+.session-size-options label {
+  display: flex; align-items: center; gap: var(--space-2); min-height: var(--touch-target-min);
+  min-width: 80px; padding: var(--space-3); border: 1px solid var(--color-border-strong);
+  border-radius: var(--radius-sm); background: var(--color-bg-card); cursor: pointer;
+}
+.session-size-options input { width: 20px; height: 20px; accent-color: var(--color-accent); }
+.session-size-options input:checked + span { font-weight: 700; text-decoration: underline; text-underline-offset: 4px; }
+.session-size-options label:focus-within { outline: var(--focus-ring); outline-offset: var(--focus-offset); }
+.session-progress { display: grid; gap: var(--space-2); color: var(--color-text-secondary); font-size: 0.9rem; }
+.session-progress progress { display: block; appearance: none; width: 100%; height: 8px; border: 0; border-radius: var(--radius-full); overflow: hidden; background: var(--color-bg-elevated); }
+.session-progress progress::-webkit-progress-bar { background: var(--color-bg-elevated); }
+.session-progress progress::-webkit-progress-value { background: var(--color-accent); }
+.session-progress progress::-moz-progress-bar { background: var(--color-accent); }
+.challenge-prompt .challenge-context {
+  font-size: 0.95rem; line-height: 1.6; margin-top: var(--space-3); padding: var(--space-3);
+  background: var(--color-bg-card); border-left: 2px solid var(--color-accent);
+}
+.btn-quit { min-height: var(--touch-target-min); min-width: var(--touch-target-min); }
+/* Texto escuro sobre verde preserva a cor existente e atende contraste AA. */
+.btn-choice--safe { color: var(--color-bg-screen); }
+.btn-choice--safe:hover:not(:disabled) { color: var(--color-bg-screen); background: var(--color-success); border-color: var(--color-text-primary); }
+.stat-label, .best-score-inline { color: var(--color-text-secondary); }
+.sms-delivery-note, .email-date-text, .email-to-line, .ig-comments-link, .ig-time-stamp { color: var(--color-text-secondary); }
+
+@media (min-width: 1024px) {
+  .app-container { max-width: 1280px; padding: var(--space-8); }
+  .challenge-screen {
+    display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto auto 1fr; column-gap: var(--space-10); row-gap: var(--space-5);
+    align-content: start;
+  }
+  .challenge-topbar { grid-column: 1 / -1; grid-row: 1; }
+  .session-progress { grid-column: 1 / -1; grid-row: 2; }
+  .challenge-prompt { grid-column: 2; grid-row: 3; }
+  .challenge-screen > .device-chassis {
+    grid-column: 1; grid-row: 3 / 5; width: 100%; max-width: 480px; justify-self: center; align-self: start;
+  }
+  .challenge-bottom-dock { grid-column: 2; grid-row: 4; margin-top: 0; align-self: start; }
+  .summary-screen { width: 100%; max-width: 840px; margin: 0 auto; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { animation: none !important; transition: none !important; scroll-behavior: auto !important; }
+}
+@media (max-width: 400px) {
+  .challenge-topbar { gap: var(--space-3); }
+  .stats-ticker { gap: var(--space-2); }
+  .ticker-item { flex-direction: column; align-items: flex-start; gap: 0; }
+  .ticker-divider { display: none; }
+}

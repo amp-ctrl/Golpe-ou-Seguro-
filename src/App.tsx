@@ -1,11 +1,10 @@
-import React, { useState, useEffect } from 'react';
-import { INITIAL_CHALLENGES, type Challenge, type WhatsAppContent, type SmsContent, type EmailContent, type InstagramContent } from './data/challenges';
+import React, { useState, useEffect, useRef } from 'react';
+import { INITIAL_CHALLENGES, type Challenge } from './data/challenges';
 import { POINTS_PER_CORRECT_ANSWER, POINTS_PER_WRONG_ANSWER } from './config';
 import { storage } from './services/storage';
-import { WhatsAppMock } from './components/mocks/WhatsAppMock';
-import { SmsMock } from './components/mocks/SmsMock';
-import { EmailMock } from './components/mocks/EmailMock';
-import { InstagramMock } from './components/mocks/InstagramMock';
+
+import { ChallengeMock } from './components/ChallengeMock';
+import { buildSession, SESSION_SIZES, type SessionSize } from './services/sessionBuilder';
 
 type Screen = 'start' | 'playing' | 'summary';
 
@@ -15,21 +14,16 @@ interface FeedbackState {
   pointsEarned: number;
 }
 
-// Algoritmo Fisher-Yates para embaralhar índices
-function shuffleArray<T>(array: T[]): T[] {
-  const shuffled = [...array];
-  for (let i = shuffled.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [shuffled[i], shuffled[j]] = [shuffled[j], shuffled[i]];
-  }
-  return shuffled;
-}
-
 export const App: React.FC = () => {
   const [screen, setScreen] = useState<Screen>('start');
   const [bestScore, setBestScore] = useState<number>(0);
 
-  // Deck de desafios embaralhados para não repetir até todos terem sido vistos
+  const [sessionSize, setSessionSize] = useState<SessionSize>(10);
+  const [startError, setStartError] = useState('');
+  const promptRef = useRef<HTMLHeadingElement>(null);
+  const answerLock = useRef(false);
+
+  // Partida finita, sem reembaralhamento durante o treino.
   const [deck, setDeck] = useState<Challenge[]>([]);
   const [currentDeckIndex, setCurrentDeckIndex] = useState<number>(0);
 
@@ -46,16 +40,23 @@ export const App: React.FC = () => {
     setBestScore(storage.getBestScore());
   }, []);
 
-  // Prepara novo baralho de desafios sem repetição
-  const prepareDeck = () => {
-    const shuffled = shuffleArray(INITIAL_CHALLENGES);
-    setDeck(shuffled);
-    setCurrentDeckIndex(0);
-  };
-
+  useEffect(() => {
+    if (screen !== 'start') promptRef.current?.focus();
+  }, [screen, currentDeckIndex]);
   // Inicia o jogo
   const handleStartGame = () => {
-    prepareDeck();
+    let session: Challenge[];
+    try {
+      session = buildSession(INITIAL_CHALLENGES, { size: sessionSize, history: storage.getSeenSessions() });
+    } catch (error) {
+      setStartError(error instanceof Error ? error.message : 'Não foi possível iniciar o treino.');
+      return;
+    }
+    setStartError('');
+    setDeck(session);
+    setCurrentDeckIndex(0);
+    storage.startSeenSession(session[0].id);
+    answerLock.current = false;
     setScore(0);
     setAnsweredCount(0);
     setCorrectCount(0);
@@ -64,11 +65,12 @@ export const App: React.FC = () => {
   };
 
   // Desafio atual
-  const currentChallenge = deck[currentDeckIndex] || INITIAL_CHALLENGES[0];
+  const currentChallenge = deck[currentDeckIndex];
 
   // Processa a resposta do usuário
   const handleAnswer = (userGuessedScam: boolean) => {
-    if (feedback !== null || !currentChallenge) return;
+    if (answerLock.current || feedback !== null || !currentChallenge) return;
+    answerLock.current = true;
 
     const isCorrect = userGuessedScam === currentChallenge.isScam;
     const pointsEarned = isCorrect ? POINTS_PER_CORRECT_ANSWER : POINTS_PER_WRONG_ANSWER;
@@ -91,42 +93,24 @@ export const App: React.FC = () => {
     });
   };
 
-  // Avança para o próximo desafio
+  // A última resposta mantém sua explicação; “Ver resumo” conclui a partida.
   const handleNextChallenge = () => {
-    setFeedback(null);
-    const nextIndex = currentDeckIndex + 1;
-
-    // Se todos os desafios do baralho foram vistos, reembaralha sem repetições
-    if (nextIndex >= deck.length) {
-      const reshuffled = shuffleArray(INITIAL_CHALLENGES);
-      setDeck(reshuffled);
-      setCurrentDeckIndex(0);
-    } else {
-      setCurrentDeckIndex(nextIndex);
+    if (feedback === null) return;
+    if (currentDeckIndex + 1 >= deck.length) {
+      handleQuit();
+      return;
     }
+    const nextIndex = currentDeckIndex + 1;
+    storage.recordSeenChallenge(deck[nextIndex].id);
+    setCurrentDeckIndex(nextIndex);
+    setFeedback(null);
+    answerLock.current = false;
   };
-
   // Encerra a partida e vai para a tela de resumo
   const handleQuit = () => {
     const updatedBest = storage.saveBestScore(score);
     setBestScore(updatedBest);
     setScreen('summary');
-  };
-
-  // Renderiza o mock adequado com base no canal
-  const renderMock = (challenge: Challenge) => {
-    switch (challenge.channel) {
-      case 'whatsapp':
-        return <WhatsAppMock content={challenge.content as WhatsAppContent} />;
-      case 'sms':
-        return <SmsMock content={challenge.content as SmsContent} />;
-      case 'email':
-        return <EmailMock content={challenge.content as EmailContent} />;
-      case 'instagram':
-        return <InstagramMock content={challenge.content as InstagramContent} />;
-      default:
-        return null;
-    }
   };
 
   return (
@@ -147,6 +131,18 @@ export const App: React.FC = () => {
             </div>
 
             <div className="start-action-group">
+              <fieldset className="session-size-picker">
+                <legend>Questões por partida</legend>
+                <div className="session-size-options">
+                  {SESSION_SIZES.map((size) => (
+                    <label key={size}>
+                      <input type="radio" name="session-size" value={size} checked={sessionSize === size} onChange={() => setSessionSize(size)} />
+                      <span>{size}</span>
+                    </label>
+                  ))}
+                </div>
+              </fieldset>
+              {startError && <p role="alert">{startError}</p>}
               <button
                 type="button"
                 className="btn-primary btn-start"
@@ -201,7 +197,7 @@ export const App: React.FC = () => {
                 </div>
               </div>
               <div className="device-screen-content">
-                <WhatsAppMock content={INITIAL_CHALLENGES[0].content as WhatsAppContent} />
+                <ChallengeMock challenge={INITIAL_CHALLENGES[0]} />
               </div>
             </div>
           </div>
@@ -209,7 +205,7 @@ export const App: React.FC = () => {
       )}
 
       {/* ===================================================================
-          TELA 2: DESAFIO + FEEDBACK (INALTERADA)
+          TELA 2: PARTIDA + FEEDBACK
           =================================================================== */}
       {screen === 'playing' && currentChallenge && (
         <section className="challenge-screen" aria-label="Tela do Desafio">
@@ -242,10 +238,14 @@ export const App: React.FC = () => {
             </button>
           </header>
 
+          <div className="session-progress">
+            <p id="session-progress-label" aria-live="polite">Questão {currentDeckIndex + 1} de {deck.length}</p>
+            <progress aria-labelledby="session-progress-label" aria-valuetext={`${answeredCount} de ${deck.length} questões respondidas`} value={answeredCount} max={deck.length} />
+          </div>
           {/* Pergunta orientadora compacta */}
           <div className="challenge-prompt">
-            <h2>Esta mensagem é um golpe ou é segura?</h2>
-            <p>Observe remetente, tom de urgência e links suspeitos.</p>
+            <h2 ref={promptRef} tabIndex={-1}>Esta mensagem é um golpe ou é segura?</h2>
+            <p className="challenge-context">{currentChallenge.context}</p>
           </div>
 
           {/* Moldura física de Smartphone Simulando Mensagem Real */}
@@ -280,7 +280,7 @@ export const App: React.FC = () => {
 
             {/* Conteúdo do Mock dentro do Smartphone */}
             <div className="device-screen-content">
-              {renderMock(currentChallenge)}
+              <ChallengeMock challenge={currentChallenge} />
             </div>
           </div>
 
@@ -310,7 +310,7 @@ export const App: React.FC = () => {
                     <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
                     <polyline points="9 12 11 14 15 10" />
                   </svg>
-                  <span>É seguro</span>
+                  <span>É segura</span>
                 </button>
               </div>
             ) : (
@@ -353,7 +353,7 @@ export const App: React.FC = () => {
                   onClick={handleNextChallenge}
                   autoFocus
                 >
-                  <span>Próximo desafio</span>
+                  <span>{currentDeckIndex + 1 === deck.length ? 'Ver resumo' : 'Próximo desafio'}</span>
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
                     <line x1="5" y1="12" x2="19" y2="12" />
                     <polyline points="12 5 19 12 12 19" />
@@ -366,7 +366,7 @@ export const App: React.FC = () => {
       )}
 
       {/* ===================================================================
-          TELA 3: RESUMO (INALTERADA)
+          TELA 3: RESUMO
           =================================================================== */}
       {screen === 'summary' && (
         <section className="summary-screen" aria-label="Tela de Resumo">
@@ -378,7 +378,7 @@ export const App: React.FC = () => {
                 <line x1="6" y1="20" x2="6" y2="14" />
               </svg>
             </div>
-            <h1 className="summary-title">Resumo do Treino</h1>
+            <h1 className="summary-title" ref={promptRef} tabIndex={-1}>Resumo do Treino</h1>
             <p className="summary-subtitle">Confira seu desempenho nesta rodada</p>
           </header>
 

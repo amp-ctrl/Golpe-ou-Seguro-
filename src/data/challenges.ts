@@ -1,186 +1,517 @@
-// RASCUNHO: conteúdo aguardando revisão do time
-
+/** Cenários educativos fictícios. Os domínios .example não são endereços de serviços reais. */
 export type ChannelType = 'whatsapp' | 'sms' | 'email' | 'instagram';
-
+export enum Category {
+  Delivery = 'encomendas', Bank = 'banco', Pix = 'pix', Identity = 'identidade',
+  Account = 'contas-e-senhas', Support = 'suporte', Job = 'emprego',
+  Investment = 'investimentos', Romance = 'relacionamento', Prize = 'premios',
+  Documents = 'documentos-e-tributos', Debt = 'renegociacao', Shopping = 'compras',
+  Ticket = 'ingressos', Marketplace = 'classificados', Credit = 'emprestimos', Payment = 'pagamentos',
+}
+export enum ScamType {
+  DeliveryFee = 'taxa-de-encomenda', FakeBank = 'falsa-central', FakeReceipt = 'comprovante-falso',
+  WrongPix = 'pix-errado', NewNumber = 'numero-novo', VerificationCode = 'roubo-de-codigo',
+  RemoteAccess = 'acesso-remoto', AdvanceJobFee = 'vaga-com-taxa', GuaranteedReturn = 'retorno-garantido',
+  Romance = 'golpe-do-romance', FakePrize = 'premio-com-taxa', FakeTax = 'tributo-falso',
+  FakeDebt = 'limpa-nome-falso', FakeStore = 'loja-falsa', Malware = 'aplicativo-malicioso',
+  FakeTicket = 'ingresso-falso', AdvanceDeposit = 'sinal-antecipado', AdvanceLoanFee = 'emprestimo-com-taxa',
+  ChangedQr = 'qr-code-adulterado', ChangedPayee = 'beneficiario-trocado',
+  ClonedProfile = 'perfil-clonado', PasswordPhishing = 'captura-de-senha',
+  FakeInfluencer = 'falso-influenciador', ShortLink = 'link-encurtado',
+}
 export interface WhatsAppContent {
-  senderName: string;
-  senderStatus?: string;
-  isGroup?: boolean;
-  groupName?: string;
-  avatarText: string;
-  messageText: string;
-  time: string;
+  senderName: string; senderStatus?: string; isGroup?: boolean; groupName?: string;
+  avatarText: string; messageText: string; time: string;
 }
-
-export interface SmsContent {
-  sender: string;
-  messageText: string;
-  time: string;
-}
-
-export interface EmailContent {
-  senderName: string;
-  senderEmail: string;
-  subject: string;
-  bodyText: string;
-  date: string;
-}
-
+export interface SmsContent { sender: string; messageText: string; time: string }
+export interface EmailContent { senderName: string; senderEmail: string; subject: string; bodyText: string; date: string }
 export interface InstagramContent {
-  username: string;
-  accountName: string;
-  isVerified: boolean;
-  followersText: string;
-  createdTime: string;
-  promoBadge?: string;
-  caption: string;
-  commentsText: string;
+  username: string; accountName: string; isVerified: boolean; followersText: string;
+  createdTime: string; promoBadge?: string; caption: string; commentsText: string;
 }
-
 export type ChallengeContent =
   | { channel: 'whatsapp'; content: WhatsAppContent }
   | { channel: 'sms'; content: SmsContent }
   | { channel: 'email'; content: EmailContent }
   | { channel: 'instagram'; content: InstagramContent };
-
-export interface Challenge {
-  id: string;
-  channel: ChannelType;
-  isScam: boolean;
-  content: WhatsAppContent | SmsContent | EmailContent | InstagramContent;
-  explanation: string;
+interface ChallengeBase {
+  id: string; category: Category; difficulty: 1 | 2 | 3;
+  /** Contexto conhecido pelo jogador: impede adivinhar se ele solicitou algo. */
+  context: string;
+  redFlags: string[]; howToVerify: string; highlights?: string[]; explanation: string;
 }
-
+type Verdict = { isScam: true; scamType: ScamType } | { isScam: false; scamType?: never };
+export type Challenge = ChallengeBase & ChallengeContent & Verdict;
+type Details = ChallengeBase & Verdict;
+// Os auxiliares só preenchem metadados visuais, sem inferir resposta ou conteúdo.
+const whatsapp = (details: Details, senderName: string, messageText: string): Challenge => ({
+  ...details, channel: 'whatsapp', content: { senderName, messageText, avatarText: senderName[0], time: '14:28' },
+});
+const sms = (details: Details, sender: string, messageText: string): Challenge => ({
+  ...details, channel: 'sms', content: { sender, messageText, time: 'Hoje 11:42' },
+});
+const email = (details: Details, senderName: string, senderEmail: string, subject: string, bodyText: string): Challenge => ({
+  ...details, channel: 'email', content: { senderName, senderEmail, subject, bodyText, date: 'Hoje, 09:15' },
+});
+const instagram = (details: Details, username: string, accountName: string, caption: string): Challenge => ({
+  ...details, channel: 'instagram', content: {
+    username, accountName, caption, isVerified: false, followersText: 'Perfil da comunidade',
+    createdTime: 'Publicado hoje', commentsText: 'Ver comentários',
+  },
+});
 export const INITIAL_CHALLENGES: Challenge[] = [
-  {
-    id: 'ch-01',
-    channel: 'whatsapp',
-    isScam: true,
-    content: {
-      senderName: '+55 (11) 97412-3088',
-      senderStatus: 'Conta Comercial Não Verificada',
-      avatarText: '📦',
-      messageText: 'Aviso de Encomenda: Seu pedido pendente foi retido na fiscalização central. Para liberação imediata, regularize a taxa postal no valor de R$ 7,90 através do link: taxa-entrega-express.online/pagar',
-      time: '14:28',
-    } as WhatsAppContent,
-    explanation: 'Transportadoras oficiais e Correios não cobram taxas de liberação via WhatsApp usando números de celular desconhecidos nem links externos suspeitos.',
-  },
-  {
-    id: 'ch-02',
-    channel: 'sms',
-    isScam: true,
-    content: {
-      sender: 'BancoAzul-Alerta',
-      messageText: 'BancoAzul: Compra aprovada de R$ 1.249,90 nas Lojas Eletro. Caso nao reconheca esta transacao, cancele imediatamente acessando: bancoazul-seguranca.top',
-      time: 'Hoje 11:42',
-    } as SmsContent,
-    explanation: 'Golpistas usam mensagens com tom de pânico e links terminados em extensões estranhas como ".top" para capturar suas senhas bancárias.',
-  },
-  {
-    id: 'ch-03',
-    channel: 'instagram',
-    isScam: true,
-    content: {
-      username: 'tenismax_oficial_br',
-      accountName: 'TênisMax Oficial',
-      isVerified: false,
-      followersText: '12 seguidores • Perfil criado há 3 dias',
-      createdTime: 'Publicado há 1 hora',
-      promoBadge: '🔥 OFERTA RELÂMPAGO - 85% OFF',
-      caption: 'LIQUIDAÇÃO DE ESTOQUE! Tênis esportivo edição especial por apenas R$ 79,90! 🏃‍♂️💨 Últimas 7 unidades no estoque, promoção válida só hoje! Compre pelo link na nossa bio: oferta-tenismax.shop',
-      commentsText: 'Comentários desativados nesta publicação',
-    } as InstagramContent,
-    explanation: 'Perfis recém-criados, sem selo de verificação, com poucos seguidores e preços absurdamente baixos usam a falsa sensação de urgência para aplicar golpes.',
-  },
-  {
-    id: 'ch-04',
-    channel: 'email',
-    isScam: true,
-    content: {
-      senderName: 'Central de Atendimento ao Consumidor',
-      senderEmail: 'suporte@reembolso-loja.net',
-      subject: 'Reembolso disponível no valor de R$ 340,00',
-      bodyText: 'Prezado(a) cliente,\n\nIdentificamos uma cobrança indevida em sua última fatura e o valor de R$ 340,00 está disponível para estorno imediato.\n\nPara validar a devolução em sua conta corrente, confirme o número completo do cartão, data de validade e o código CVV no prazo improrrogável de até 24 horas acessando: portal-estorno-seguro.net\n\nCaso não confirme, o valor será cancelado.',
-      date: 'Hoje, 09:15',
-    } as EmailContent,
-    explanation: 'Lojas e instituições sérias nunca pedem código de segurança (CVV) ou dados sigilosos de cartão por e-mail para efetuar reembolsos.',
-  },
-  {
-    id: 'ch-05',
-    channel: 'whatsapp',
-    isScam: true,
-    content: {
-      senderName: '+55 (21) 96521-8844',
-      senderStatus: 'visto por último hoje às 15:10',
-      avatarText: '👤',
-      messageText: 'Oi mãe, salve meu novo número aí! Meu celular antigo quebrou a tela e perdi tudo provisoriamente. Preciso pagar uma conta urgente hoje antes das 16h, você consegue fazer um Pix de R$ 800 pra mim? Mais tarde te ligo e te explico certinho.',
-      time: '15:12',
-    } as WhatsAppContent,
-    explanation: 'É o clássico golpe do número novo: criminosos fingem ser parentes pedindo dinheiro urgente. Sempre ligue no número antigo ou confirme pessoalmente antes de transferir.',
-  },
-  {
-    id: 'ch-06',
-    channel: 'whatsapp',
-    isScam: true,
-    content: {
-      senderName: 'Grupo: Promoções & Cupons VIP 🔥',
-      isGroup: true,
-      groupName: 'Promoções & Cupons VIP 🔥',
-      avatarText: '🎁',
-      messageText: '🚨 BÔNUS EXCLUSIVO! Cupom de 90% OFF para compras no ZapFome hoje! Válido apenas para quem atualizar o app pela versão promocional: zapfome-cupom90-atualizado.apk (baixe o arquivo e instale no seu celular antes que acabe)',
-      time: '16:05',
-    } as WhatsAppContent,
-    explanation: 'Instalar arquivos ".apk" enviados por mensagens instala programas maliciosos que podem clonar seu aparelho e roubar credenciais bancárias.',
-  },
-  {
-    id: 'ch-07',
-    channel: 'sms',
-    isScam: false,
-    content: {
-      sender: 'BancoAzul',
-      messageText: 'BancoAzul: Seu codigo de verificacao de acesso e 482913. Valido por 5 minutos. Nao compartilhe este codigo com ninguem, nem mesmo com funcionários do banco.',
-      time: 'Agora',
-    } as SmsContent,
-    explanation: 'Esta mensagem é legítima: foi gerada durante a tentativa de login do usuário, não contém links externos e reforça a regra de segurança de não repassar o código.',
-  },
-  {
-    id: 'ch-08',
-    channel: 'email',
-    isScam: false,
-    content: {
-      senderName: 'Loja Exemplo',
-      senderEmail: 'noreply@lojaexemplo.com.br',
-      subject: 'Pedido #84920 confirmado com sucesso!',
-      bodyText: 'Olá! Recebemos a confirmação do pagamento do seu pedido #84920.\n\nItens: 1x Camiseta Algodão Básica Preta\nPrevisão de entrega: até 5 dias úteis.\n\nPara sua segurança, não solicitamos senhas ou confirmação de dados financeiros por e-mail. Você pode acompanhar todas as etapas da entrega diretamente pelo aplicativo oficial da Loja Exemplo.',
-      date: 'Ontem, 16:40',
-    } as EmailContent,
-    explanation: 'O e-mail vem de domínio institucional reconhecido, não solicita dados sensíveis e orienta o cliente a consultar o status no aplicativo oficial.',
-  },
-  {
-    id: 'ch-09',
-    channel: 'instagram',
-    isScam: false,
-    content: {
-      username: 'lojaexemplomoda',
-      accountName: 'Loja Exemplo Moda',
-      isVerified: true,
-      followersText: '245 mil seguidores • Perfil verificado',
-      createdTime: 'Publicado há 3 horas',
-      promoBadge: '🏷️ CUPOM DE BOAS-VINDAS',
-      caption: 'Quer renovar o guarda-roupa? Ganhe 15% de desconto na sua primeira compra utilizando o cupom BEMVINDO15 na tela de finalização do nosso app oficial! Baixe diretamente na Google Play ou App Store. Válido até o fim do mês.',
-      commentsText: 'Ver todos os 38 comentários',
-    } as InstagramContent,
-    explanation: 'Conta verificada, com audiência consolidada e transparência: a promoção exige apenas aplicar um cupom de desconto dentro do aplicativo oficial.',
-  },
-  {
-    id: 'ch-10',
-    channel: 'sms',
-    isScam: false,
-    content: {
-      sender: 'BancoAzul',
-      messageText: 'BancoAzul: Sua fatura com vencimento em 15/11 ja esta fechada. Para consultar o valor detalhado e o codigo de barras, acesse o app BancoAzul.',
-      time: 'Ontem 14:02',
-    } as SmsContent,
-    explanation: 'Notificação puramente informativa, sem nenhum link suspeito, direcionando o cliente para consultar os dados com segurança dentro do app oficial do banco.',
-  },
+  whatsapp({
+    id: 'ch-01', category: Category.Delivery, difficulty: 1, isScam: true, scamType: ScamType.DeliveryFee,
+    context: 'Você não fez pedido recente na transportadora EntregaNuvem.',
+    redFlags: ['Cobrança de encomenda não reconhecida', 'Pagamento direcionado a endereço recebido na conversa'],
+    howToVerify: 'Abra por conta própria o canal da transportadora usada na compra e consulte o rastreio.',
+    highlights: ['taxa-entrega-express.example/pagar', 'liberação imediata'],
+    explanation: 'A cobrança usa uma encomenda que você não reconhece para induzir um pagamento rápido. O endereço enviado na conversa não comprova vínculo com a entrega; confirme a existência do pedido antes de pagar.',
+  }, 'EntregaNuvem • taxas', 'Aviso de encomenda: seu pacote ficou retido na fiscalização. Para liberação imediata, regularize a taxa de R$ 7,90: taxa-entrega-express.example/pagar'),
+  sms({
+    id: 'ch-02', category: Category.Bank, difficulty: 1, isScam: true, scamType: ScamType.FakeBank,
+    context: 'Você usa o BancoAzul. A mensagem chegou sem você abrir o aplicativo.',
+    redFlags: ['Cancelamento por link enviado no SMS', 'Pressão para agir imediatamente'],
+    howToVerify: 'Abra o app do banco por conta própria e confira compras e canais de atendimento.',
+    highlights: ['cancele imediatamente', 'bancoazul-seguranca.example'],
+    explanation: 'O susto com uma compra alta é usado para levar você a uma página de cancelamento falsa. Um nome de remetente familiar não autentica um SMS; confira a compra diretamente no app.',
+  }, 'BancoAzul-Alerta', 'BancoAzul: compra aprovada de R$ 1.249,90 na EletroBrisa. Se nao reconhece, cancele imediatamente em bancoazul-seguranca.example'),
+  instagram({
+    id: 'ch-03', category: Category.Shopping, difficulty: 1, isScam: true, scamType: ScamType.FakeStore,
+    context: 'Você encontrou um anúncio de uma loja que ainda não conhece.',
+    redFlags: ['Desconto de 85% condicionado a Pix imediato', 'Cobrança em nome de pessoa alheia à loja'],
+    howToVerify: 'Pesquise a loja fora do anúncio e confira quem receberá o pagamento antes de concluir.',
+    highlights: ['85% OFF', 'Pix para Rafael Ventomar'],
+    explanation: 'O desconto extremo vem acompanhado de pressão e de um recebedor sem relação explicada com a loja. Nenhum desses detalhes isolados prova uma fraude, mas o conjunto exige interromper e verificar a oferta.',
+  }, 'tenismax_ofertas', 'TênisMax', '85% OFF no tênis da semana! Só nas próximas dez compras. Finalize por Pix para Rafael Ventomar no link oferta-tenismax.example. Não deixe pra depois!'),
+  email({
+    id: 'ch-04', category: Category.Payment, difficulty: 1, isScam: true, scamType: ScamType.PasswordPhishing,
+    context: 'Você não pediu estorno à loja e recebeu este e-mail.',
+    redFlags: ['Pedido de CVV para devolver dinheiro', 'Ameaça de perder o reembolso'],
+    howToVerify: 'Consulte o pedido no canal da loja que você já usava, sem seguir o endereço do e-mail.',
+    highlights: ['código CVV', 'portal-estorno-seguro.example'],
+    explanation: 'Solicitar CVV e os dados completos do cartão para liberar um estorno expõe suas credenciais de pagamento. O prazo artificial tenta impedir que você confira se o reembolso existe.',
+  }, 'Central de Reembolsos Brisa', 'suporte@reembolso-loja.example', 'Seu estorno de R$ 340,00 está disponível', 'Identificamos uma cobrança indevida. Para devolver R$ 340,00, informe o número do cartão, validade e código CVV em portal-estorno-seguro.example.\n\nConfirme em 24 horas ou o reembolso será cancelado.'),
+  whatsapp({
+    id: 'ch-05', category: Category.Identity, difficulty: 1, isScam: true, scamType: ScamType.NewNumber,
+    context: 'Um contato desconhecido, identificado como “Número novo”, mandou esta mensagem.',
+    redFlags: ['Troca de número sem confirmação', 'Dinheiro urgente antes de conversar por voz'],
+    howToVerify: 'Ligue para o familiar pelo número que você já tinha ou confirme por outro contato de confiança.',
+    highlights: ['Oi mãe', 'Mais tarde te ligo'],
+    explanation: 'A pessoa tenta estabelecer parentesco sem se identificar de forma verificável. Pedir dinheiro antes de permitir a confirmação por voz é um sinal concreto de falsa identidade.',
+  }, 'Número novo', 'Oi mãe, meu celular quebrou, salva esse aqui. Preciso pagar R$ 800 antes das 16h. Faz um Pix pra mim? Mais tarde te ligo e explico certinho.'),
+  whatsapp({
+    id: 'ch-06', category: Category.Shopping, difficulty: 1, isScam: true, scamType: ScamType.Malware,
+    context: 'Uma mensagem foi encaminhada ao grupo de cupons da turma.',
+    redFlags: ['Instalação de APK recebido em mensagem', 'Desconto condicionado a trocar o aplicativo'],
+    howToVerify: 'Procure o cupom dentro do app que você já instalou pela loja de aplicativos do aparelho.',
+    highlights: ['zapfome-cupom90.apk', 'instale antes que acabe'],
+    explanation: 'O desconto é uma isca para instalar um arquivo de origem desconhecida. Esse arquivo pode pedir permissões que exponham dados e contas; não é necessário substituir o app para conferir uma promoção.',
+  }, 'Grupo Cupons da Turma', 'BÔNUS! Cupom de 90% no ZapFome. Baixe zapfome-cupom90.apk e instale antes que acabe. A versão normal não mostra essa oferta!'),
+  sms({
+    id: 'ch-07', category: Category.Account, difficulty: 1, isScam: false,
+    context: 'Você acabou de solicitar um código para entrar no app BancoAzul.',
+    redFlags: [], howToVerify: 'Digite o código somente na tela do app em que você iniciou o acesso.',
+    highlights: ['Nao compartilhe'],
+    explanation: 'Neste cenário, o código corresponde ao acesso que você iniciou e não pede resposta ao remetente. A orientação de não compartilhar ajuda a proteger a conta, mas o código deve ser usado apenas no app aberto por você.',
+  }, 'BancoAzul', 'BancoAzul: seu codigo de acesso e 482913. Valido por 5 minutos. Nao compartilhe com ninguem, nem com funcionarios.'),
+  email({
+    id: 'ch-08', category: Category.Delivery, difficulty: 2, isScam: false,
+    context: 'Você comprou uma camiseta na Loja Horizonte e o pedido 84920 aparece no app. O domínio usado pela loja é lojahorizonte.example.',
+    redFlags: [], howToVerify: 'Abra o app da loja e compare o número do pedido e os itens comprados.',
+    highlights: ['pedido 84920', 'pelo aplicativo'],
+    explanation: 'O número e o item correspondem à compra que você fez, e o remetente usa o domínio esperado no cenário. Esses sinais dão contexto à confirmação, sem transformar a aparência de um e-mail em garantia absoluta.',
+  }, 'Loja Horizonte', 'pedidos@lojahorizonte.example', 'Pedido 84920 confirmado', 'Olá! O pagamento do pedido 84920 foi confirmado: uma camiseta de algodão preta.\n\nA previsão é de até cinco dias úteis. Acompanhe as etapas pelo aplicativo que você já utiliza. Não é preciso enviar dados financeiros por e-mail.'),
+  instagram({
+    id: 'ch-09', category: Category.Shopping, difficulty: 2, isScam: false,
+    context: 'Você já segue este perfil da Loja Horizonte e o mesmo cupom aparece no app que utiliza.',
+    redFlags: [], howToVerify: 'Abra o app por conta própria, aplique o cupom e confira preço final e condições.',
+    highlights: ['dentro do nosso app', 'até o fim do mês'],
+    explanation: 'O cupom pode ser conferido no ambiente de compra que você já conhece e não exige transferência para um contato. Uma promoção legítima ainda pode incentivar compra por impulso; avalie se o produto cabe no orçamento.',
+  }, 'horizonte_moda', 'Loja Horizonte', 'Boas-vindas! Use BEMVINDO15 na primeira compra dentro do nosso app. Válido até o fim do mês, com condições na tela do cupom. Escolha com calma.'),
+  sms({
+    id: 'ch-10', category: Category.Bank, difficulty: 1, isScam: false,
+    context: 'Você é cliente do BancoAzul e costuma receber o aviso de fechamento da fatura.',
+    redFlags: [], howToVerify: 'Abra diretamente o aplicativo do banco e veja a fatura, sem responder ao SMS.',
+    highlights: ['acesse o app'],
+    explanation: 'A mensagem apenas avisa sobre a fatura e orienta uma consulta independente, sem cobrar por um link. Isso é compatível com o serviço que você usa; confira os valores dentro do app antes de pagar.',
+  }, 'BancoAzul', 'BancoAzul: sua fatura com vencimento em 15/11 ja esta fechada. Para consultar valores e codigo de barras, acesse o app.'),
+  whatsapp({
+    id: 'ch-11', category: Category.Pix, difficulty: 2, isScam: true, scamType: ScamType.FakeReceipt,
+    context: 'Você está vendendo uma bicicleta. O comprador enviou uma imagem de comprovante, mas o extrato não mostra entrada.',
+    redFlags: ['Comprovante sem crédito no extrato', 'Pressão para entregar o produto antes da confirmação'],
+    howToVerify: 'Confira a entrada no seu próprio app bancário antes de entregar a bicicleta.',
+    highlights: ['já mandei o comprovante', 'libera a bike'],
+    explanation: 'Uma imagem de comprovante pode ser editada ou mostrar apenas um agendamento. O que confirma o recebimento é o crédito na sua conta, e não a insistência do comprador.',
+  }, 'Comprador da bicicleta', 'Oi! Já fiz o Pix e já mandei o comprovante. O banco demora mesmo. Meu primo tá chegando, libera a bike pra ele que o valor cai daqui a pouco.'),
+  whatsapp({
+    id: 'ch-12', category: Category.Pix, difficulty: 2, isScam: true, scamType: ScamType.WrongPix,
+    context: 'Entrou um Pix que você não esperava. Um desconhecido pediu a devolução para uma terceira pessoa.',
+    redFlags: ['Devolução para chave diferente da origem', 'Pedido para fazer uma nova transferência'],
+    howToVerify: 'Confira a transação e use a função de devolução vinculada ao Pix original; em dúvida, fale com seu banco.',
+    highlights: ['devolve pra chave da minha irmã'],
+    explanation: 'Mesmo quando o dinheiro entrou, transferir para outra pessoa rompe o vínculo com a operação original e pode trazer prejuízo. A devolução deve ser tratada a partir da transação recebida no app, com apoio do banco se necessário.',
+  }, 'Contato não salvo', 'Fiz um Pix errado pra você agora. Era o aluguel! Por favor, devolve pra chave da minha irmã, que eu te mando aqui. Minha conta tá com problema.'),
+  whatsapp({
+    id: 'ch-13', category: Category.Identity, difficulty: 3, isScam: true, scamType: ScamType.ClonedProfile,
+    context: 'O contato tem a foto da sua amiga Lia, mas é outro número. Você ainda não falou com ela por outro canal.',
+    redFlags: ['Foto conhecida em número diferente', 'Transferência pedida sem confirmar a identidade'],
+    howToVerify: 'Converse com Lia pelo contato antigo ou por outro canal já conhecido antes de transferir.',
+    highlights: ['pra conta do fornecedor'],
+    explanation: 'Foto e nome podem ser copiados e não confirmam quem está conversando. O pedido de pagar um terceiro só deve ser considerado depois de verificar a identidade fora dessa conversa.',
+  }, 'Lia • trabalho', 'Oi! Você consegue adiantar os R$ 120 do jantar pra conta do fornecedor? Depois a gente acerta. Tô fechando aqui com o pessoal.'),
+  whatsapp({
+    id: 'ch-14', category: Category.Account, difficulty: 2, isScam: true, scamType: ScamType.VerificationCode,
+    context: 'Um contato diz organizar um grupo de estudos. Você não pediu código de acesso.',
+    redFlags: ['Solicitação de código recebido por SMS', 'Código apresentado como convite de grupo'],
+    howToVerify: 'Não repasse o código; confirme com o organizador por um canal conhecido e revise a segurança da conta.',
+    highlights: ['me manda os seis dígitos'],
+    explanation: 'Um convite de grupo não precisa do código que protege seu acesso ao aplicativo. Repassá-lo pode permitir que outra pessoa registre a sua conta em um aparelho diferente.',
+  }, 'Monitoria • convite', 'Vou te incluir no grupo da monitoria. Chegou um SMS aí? Pra validar o convite, me manda os seis dígitos que apareceram.'),
+  whatsapp({
+    id: 'ch-15', category: Category.Support, difficulty: 3, isScam: true, scamType: ScamType.RemoteAccess,
+    context: 'Você abriu um chamado no provedor RedeBrisa, mas este contato não aparece no atendimento que você iniciou.',
+    redFlags: ['Instalação de acesso remoto fora do chamado', 'Pedido de código que permite controlar o aparelho'],
+    howToVerify: 'Retome o chamado pelo canal do provedor e confirme o procedimento antes de instalar qualquer ferramenta.',
+    highlights: ['código de acesso remoto'],
+    explanation: 'Saber que existe um problema de internet não prova que o contato pertence ao provedor. O código de acesso remoto pode entregar o controle do aparelho; confirme a identidade no atendimento que você iniciou.',
+  }, 'RedeBrisa • técnico', 'Recebi o diagnóstico da sua conexão. Podemos ajustar sem visita: instale o AssistenteBrisa que vou enviar e me passe o código de acesso remoto. Leva só alguns minutos.'),
+  whatsapp({
+    id: 'ch-16', category: Category.Romance, difficulty: 3, isScam: true, scamType: ScamType.Romance,
+    context: 'Você conversa há algumas semanas com alguém que nunca aceitou chamada de vídeo e agora pede dinheiro para um terceiro.',
+    redFlags: ['Identidade nunca confirmada em conversa ao vivo', 'Pagamento a terceiro apoiado em vínculo afetivo'],
+    howToVerify: 'Não transfira; verifique a identidade por meios independentes e converse com alguém de confiança.',
+    highlights: ['conta de um colega', 'não contar pra ninguém'],
+    explanation: 'O vínculo afetivo é usado para reduzir a checagem de um pedido financeiro. A recusa recorrente de contato ao vivo, somada ao pagamento a terceiro e ao segredo, torna este pedido inseguro.',
+  }, 'André • viagem', 'Queria te encontrar no fim de semana, mas minha bagagem ficou presa. Pode ajudar com a taxa na conta de um colega? Prefiro não contar pra ninguém até resolver. Te devolvo quando chegar.'),
+  whatsapp({
+    id: 'ch-17', category: Category.Delivery, difficulty: 2, isScam: false,
+    context: 'Você pediu um livro na Livraria Vento e autorizou avisos da entrega. O pedido 312 está no app.',
+    redFlags: [], howToVerify: 'Confira o pedido 312 no app da livraria, aberto por você.',
+    highlights: ['Não é necessário pagar'],
+    explanation: 'O aviso corresponde a uma compra esperada e não pede dados nem pagamento adicional. Ainda assim, o acompanhamento deve ser feito pelo canal que você já usava na compra.',
+  }, 'Livraria Vento', 'Olá! O livro do pedido 312 saiu para entrega hoje. Não é necessário pagar nenhuma taxa ao entregador. Você pode acompanhar pelo app da livraria.'),
+  whatsapp({
+    id: 'ch-18', category: Category.Identity, difficulty: 1, isScam: false,
+    context: 'Sua irmã avisou pessoalmente que trocou de número. Você acabou de confirmar a troca em ligação pelo contato antigo.',
+    redFlags: [], howToVerify: 'Use a confirmação feita fora da nova conversa e mantenha o número atualizado nos contatos.',
+    highlights: ['como combinamos na ligação'],
+    explanation: 'A troca de número foi confirmada por um canal que você já conhecia. O texto parecido com “número novo” não basta para classificar uma fraude quando existe essa verificação independente.',
+  }, 'Bia • número novo', 'Oi! Esse é o número novo, como combinamos na ligação. Pode salvar. Mais tarde te mando as fotos do almoço.'),
+  whatsapp({
+    id: 'ch-19', category: Category.Payment, difficulty: 2, isScam: false,
+    context: 'Você pediu à Escola Ipê, pelo atendimento já conhecido, a segunda via da mensalidade. O beneficiário no app bancário é Escola Ipê, como no contrato.',
+    redFlags: [], howToVerify: 'Compare beneficiário, valor e vencimento com o contrato e o atendimento iniciado por você.',
+    highlights: ['Confira o beneficiário'],
+    explanation: 'O boleto foi solicitado e os dados do recebedor correspondem ao contrato neste cenário. A conferência no app bancário é mais útil do que confiar apenas no logotipo ou na aparência do documento.',
+  }, 'Escola Ipê • secretaria', 'Segue a segunda via da mensalidade que você pediu. O valor e o vencimento são os do contrato. Confira o beneficiário antes de confirmar no banco; qualquer diferença, avise a secretaria.'),
+  whatsapp({
+    id: 'ch-20', category: Category.Pix, difficulty: 3, isScam: false,
+    context: 'Você recebeu um Pix por engano e conferiu a entrada no extrato. A pessoa pede que use a devolução da própria transação.',
+    redFlags: [], howToVerify: 'Abra a transação recebida no seu app e confira a opção de devolver, sem fazer Pix para uma chave enviada no chat.',
+    highlights: ['função de devolver no seu banco'],
+    explanation: 'Há um crédito confirmado e o pedido preserva o vínculo com a operação recebida. Diferenciar a devolução no app de uma nova transferência para terceiros evita confundir um erro real com uma tentativa de desvio.',
+  }, 'Remetente do Pix', 'Boa tarde, enviei um Pix pra você por engano. Pode conferir seu extrato e usar a função de devolver no seu banco? Não precisa me mandar dados nem fazer outra transferência.'),
+  whatsapp({
+    id: 'ch-21', category: Category.Support, difficulty: 2, isScam: false,
+    context: 'Você iniciou atendimento na RedeBrisa pelo app e recebeu este retorno na mesma conversa.',
+    redFlags: [], howToVerify: 'Confira o protocolo no app do provedor antes de seguir as orientações.',
+    highlights: ['Não precisamos de senha'],
+    explanation: 'O retorno acontece no atendimento que você iniciou e propõe um teste simples sem acesso a contas. Isso é diferente de um contato avulso pedindo instalação ou controle do aparelho.',
+  }, 'RedeBrisa • atendimento', 'Sobre o protocolo 218 que você abriu: desligue o roteador da tomada e ligue novamente após alguns segundos. Não precisamos de senha, código de acesso ou app de controle remoto.'),
+  whatsapp({
+    id: 'ch-22', category: Category.Pix, difficulty: 3, isScam: false,
+    context: 'Seu amigo Caio pediu a divisão do almoço na conversa antiga. Você confirmou o valor pessoalmente e o recebedor no banco é o próprio Caio.',
+    redFlags: [], howToVerify: 'Compare o pedido com a combinação presencial e confira o nome do recebedor no banco.',
+    highlights: ['que a gente conferiu na mesa'],
+    explanation: 'O pedido tem contexto confirmado presencialmente e um recebedor compatível com o combinado. Pedir Pix por mensagem não define uma fraude por si só; identidade, finalidade e destino precisam fazer sentido.',
+  }, 'Caio', 'Oi, ficou R$ 32 pra cada no almoço, o valor que a gente conferiu na mesa. Quando puder, manda minha parte. Sem pressa!'),
+  sms({
+    id: 'ch-23', category: Category.Documents, difficulty: 2, isScam: true, scamType: ScamType.FakeTax,
+    context: 'Você recebeu um aviso de multa do serviço fictício ViaClara, sem ter consultado esse serviço.',
+    redFlags: ['Ameaça de bloqueio no mesmo dia', 'Quitação direcionada pelo próprio SMS'],
+    howToVerify: 'Consulte a pendência no portal do órgão responsável, acessando por um endereço obtido de forma independente.',
+    highlights: ['CNH sera bloqueada hoje', 'viaclara-quitar.example'],
+    explanation: 'A ameaça de bloquear a CNH tenta apressar o pagamento por um caminho controlado pelo remetente. Um débito de trânsito precisa ser conferido no canal do órgão responsável, com os dados da infração.',
+  }, 'ViaClara-Aviso', 'Sua CNH sera bloqueada hoje por multa pendente. Quite com desconto em viaclara-quitar.example e evite a suspensao.'),
+  sms({
+    id: 'ch-24', category: Category.Debt, difficulty: 2, isScam: true, scamType: ScamType.FakeDebt,
+    context: 'Você não iniciou negociação de dívida com a empresa AcordoBrisa.',
+    redFlags: ['Promessa de eliminar qualquer dívida', 'Taxa antecipada sem identificar credor ou contrato'],
+    howToVerify: 'Procure o credor por um canal já conhecido e confira a existência da dívida e do acordo.',
+    highlights: ['qualquer divida', 'taxa de cadastro'],
+    explanation: 'O anúncio promete um resultado amplo sem apresentar qual dívida será negociada. Cobrar uma taxa antes de identificar credor e condições impede verificar o que está sendo contratado.',
+  }, 'AcordoBrisa', 'Limpe seu nome de qualquer divida hoje. Pague so R$ 29 de taxa de cadastro em acordobrisa-taxa.example e receba a baixa imediata.'),
+  sms({
+    id: 'ch-25', category: Category.Credit, difficulty: 1, isScam: true, scamType: ScamType.AdvanceLoanFee,
+    context: 'Você não solicitou empréstimo à financeira CréditoNuvem.',
+    redFlags: ['Crédito não solicitado apresentado como aprovado', 'Depósito para liberar o empréstimo'],
+    howToVerify: 'Procure a instituição por um canal independente e confira a proposta e o contrato antes de contratar.',
+    highlights: ['deposite R$ 180', 'liberar'],
+    explanation: 'O dinheiro prometido depende de um depósito que você precisa fazer primeiro. Essa cobrança para “liberar” crédito é a isca; não transfira com base apenas na mensagem de aprovação.',
+  }, 'CreditoNuvem', 'Consignado aprovado: R$ 5.000 para voce. Para liberar, deposite R$ 180 de seguro na chave enviada pelo consultor. Sem analise!'),
+  sms({
+    id: 'ch-26', category: Category.Account, difficulty: 3, isScam: true, scamType: ScamType.PasswordPhishing,
+    context: 'Você usa o serviço NuvemCaderno no domínio nuvemcaderno.example. Não pediu recuperação de conta.',
+    redFlags: ['Revalidação de conta não solicitada', 'Endereço com palavras extras no nome do serviço'],
+    howToVerify: 'Abra o serviço pelo favorito que já usa e consulte avisos de segurança na própria conta.',
+    highlights: ['nuvemcaderno-acesso.example/revisao'],
+    explanation: 'A mensagem usa um texto discreto, mas encaminha a uma variante do endereço conhecido. O nome do serviço dentro do domínio não confirma que a página pertence a ele.',
+  }, 'NuvemCaderno', 'Concluimos uma revisao de acesso. Para manter seus dispositivos sincronizados, confirme sua conta em nuvemcaderno-acesso.example/revisao.'),
+  sms({
+    id: 'ch-27', category: Category.Prize, difficulty: 2, isScam: true, scamType: ScamType.FakePrize,
+    context: 'Você não participou de nenhum sorteio da ClubeBrisa.',
+    redFlags: ['Prêmio de sorteio não reconhecido', 'Frete obrigatório para receber o prêmio'],
+    howToVerify: 'Procure o regulamento e o organizador fora da mensagem; não pague para liberar prêmio não reconhecido.',
+    highlights: ['Pague o frete'],
+    explanation: 'O prêmio inesperado cria uma recompensa atraente antes de cobrar uma pequena quantia. Sem participação e regulamento verificáveis, o pagamento do frete só transfere dinheiro ao remetente.',
+  }, 'ClubeBrisa', 'Seu numero foi sorteado para ganhar um tablet! Pague o frete de R$ 24,90 em clubebrisa-premio.example para receber. Resgate ate as 18h.'),
+  sms({
+    id: 'ch-28', category: Category.Delivery, difficulty: 2, isScam: true, scamType: ScamType.ShortLink,
+    context: 'Você espera uma encomenda da EntregaNuvem, mas o pedido no app continua sem pendências de endereço.',
+    redFlags: ['Link encurtado esconde o destino', 'Pendência não aparece no acompanhamento do pedido'],
+    howToVerify: 'Abra o rastreio que consta no pedido original e confirme se há necessidade de atualizar o endereço.',
+    highlights: ['curto.example/p7x'],
+    explanation: 'Esperar uma entrega pode fazer uma mensagem genérica parecer convincente. O link oculta o destino e a pendência não existe no acompanhamento conhecido; consulte o pedido sem passar pelo SMS.',
+  }, 'EntregaNuvem', 'Nao conseguimos confirmar o numero da sua casa. Atualize o endereco para a proxima tentativa: curto.example/p7x'),
+  sms({
+    id: 'ch-29', category: Category.Bank, difficulty: 3, isScam: true, scamType: ScamType.FakeBank,
+    context: 'Você não abriu chamado. O app BancoAzul não registra o protocolo citado no SMS.',
+    redFlags: ['Protocolo ausente no app', 'Atendimento desviado para um contato indicado no SMS'],
+    howToVerify: 'Entre no atendimento dentro do app do banco e pergunte sobre o protocolo informado.',
+    highlights: ['retorne pelo contato deste SMS'],
+    explanation: 'Um número de protocolo dá aparência administrativa, mas pode ser inventado. Direcionar o retorno por este SMS evita o canal que permitiria autenticar o atendimento.',
+  }, 'BancoAzul', 'Protocolo 6108: revisao preventiva de cadastro. Quando estiver disponivel, retorne pelo contato deste SMS para concluir o atendimento com nossa central.'),
+  sms({
+    id: 'ch-30', category: Category.Delivery, difficulty: 1, isScam: false,
+    context: 'Você comprou na Loja Horizonte e o pedido 527 está em transporte no app.',
+    redFlags: [], howToVerify: 'Compare o pedido 527 com o acompanhamento no app em que você comprou.',
+    highlights: ['Nenhuma acao e necessaria'],
+    explanation: 'O aviso corresponde a um pedido esperado e não exige um pagamento ou cadastro pelo SMS. A orientação permite checar a entrega por conta própria no ambiente da compra.',
+  }, 'LojaHorizonte', 'Pedido 527 em transporte. Nenhuma acao e necessaria. Consulte as atualizacoes na area Meus Pedidos do app que voce ja utiliza.'),
+  sms({
+    id: 'ch-31', category: Category.Account, difficulty: 2, isScam: false,
+    context: 'Você pediu uma alteração de senha no NuvemCaderno há instantes e mantém a tela de recuperação aberta.',
+    redFlags: [], howToVerify: 'Use o código apenas na recuperação que você iniciou; se não reconhecesse o pedido, não o utilizaria.',
+    highlights: ['Nao responda'],
+    explanation: 'O momento e a finalidade coincidem com a solicitação feita por você. Um código solicitado pode ser legítimo, mas nunca deve ser entregue a outra pessoa que peça para “validar” uma conta.',
+  }, 'NuvemCaderno', 'Codigo para a alteracao de senha solicitada: 731864. Use apenas na tela que voce abriu. Nao responda nem compartilhe este codigo.'),
+  sms({
+    id: 'ch-32', category: Category.Documents, difficulty: 3, isScam: false,
+    context: 'Você ativou lembretes no serviço fictício ViaClara. A consulta independente no portal confirma a data de licenciamento.',
+    redFlags: [], howToVerify: 'Abra o portal pelo endereço já salvo e confira o documento e os valores antes de qualquer pagamento.',
+    highlights: ['sem link de pagamento'],
+    explanation: 'O lembrete foi autorizado e a informação coincide com a consulta independente no cenário. Avisos sobre documentos não são automaticamente fraude; o cuidado é confirmar a pendência antes de pagar.',
+  }, 'ViaClara', 'Lembrete de licenciamento que voce ativou: ha uma data proxima no seu cadastro. Consulte os detalhes no portal que ja utiliza. Aviso sem link de pagamento.'),
+  sms({
+    id: 'ch-33', category: Category.Job, difficulty: 2, isScam: false,
+    context: 'Você se candidatou à vaga de assistente na Estúdio Vento e o convite aparece no portal da candidatura.',
+    redFlags: [], howToVerify: 'Entre no portal por conta própria e confira o agendamento da entrevista.',
+    highlights: ['Nao cobramos taxas'],
+    explanation: 'O convite corresponde a uma candidatura existente e pode ser confirmado no portal usado na inscrição. Não há promessa de renda fácil nem cobrança para participar da seleção.',
+  }, 'EstudioVento', 'Sua entrevista para assistente foi agendada no portal da candidatura. Confira o horario por la. Nao cobramos taxas para participar do processo.'),
+  sms({
+    id: 'ch-34', category: Category.Prize, difficulty: 3, isScam: false,
+    context: 'Você se inscreveu no sorteio gratuito da Feira Ipê e seu protocolo consta na lista que consultou pelo canal já conhecido.',
+    redFlags: [], howToVerify: 'Confira protocolo, regulamento e retirada no canal da feira que você já conhecia.',
+    highlights: ['Sem taxa'],
+    explanation: 'Há participação prévia e confirmação por um canal independente da mensagem. O prêmio não exige pagamento ou envio de credenciais, o que diferencia este cenário de uma cobrança para liberar um ganho inesperado.',
+  }, 'FeiraIpe', 'O protocolo da sua inscricao esta na lista de contemplados do sorteio da feira. Veja a retirada no regulamento que voce recebeu ao participar. Sem taxa ou envio de dados por SMS.'),
+  email({
+    id: 'ch-35', category: Category.Job, difficulty: 1, isScam: true, scamType: ScamType.AdvanceJobFee,
+    context: 'Você está procurando emprego, mas não se candidatou à vaga da equipe CasaNuvem.',
+    redFlags: ['Pagamento de kit antes da contratação', 'Vaga garantida sem entrevista'],
+    howToVerify: 'Pesquise a empresa fora do e-mail e confirme o processo seletivo em um canal obtido de forma independente.',
+    highlights: ['R$ 89 pelo kit', 'vaga está garantida'],
+    explanation: 'A promessa de contratação dispensa avaliação e exige que o candidato pague primeiro. O kit funciona como justificativa para cobrar por uma vaga que não foi verificada.',
+  }, 'CasaNuvem • seleção', 'vagas@casanuvem-selecao.example', 'Home office: início imediato', 'Seu perfil foi selecionado para trabalhar de casa. A vaga está garantida, sem entrevista.\n\nEnvie R$ 89 pelo kit de treinamento para receber seu contrato. Precisamos da confirmação ainda hoje.'),
+  email({
+    id: 'ch-36', category: Category.Payment, difficulty: 3, isScam: true, scamType: ScamType.ChangedPayee,
+    context: 'Você espera o boleto da Escola Ipê. Ao abrir no banco, o beneficiário é Oficina Pedralva, diferente do contrato e das mensalidades anteriores.',
+    redFlags: ['Beneficiário diferente do contratado', 'Justificativa para ignorar a divergência no banco'],
+    howToVerify: 'Interrompa o pagamento e confirme com a secretaria pelo contato já conhecido, sem responder ao e-mail.',
+    highlights: ['desconsidere a razão social'],
+    explanation: 'A aparência do boleto pode reproduzir o documento esperado, mas o dinheiro vai para o beneficiário mostrado pelo banco. A instrução para ignorar essa divergência é o sinal que exige verificar a cobrança.',
+  }, 'Escola Ipê • financeiro', 'financeiro@escolaipe-cobranca.example', 'Mensalidade atualizada', 'Segue a mensalidade deste mês. Por atualização do nosso sistema, desconsidere a razão social exibida pelo banco.\n\nO valor e o vencimento permanecem os mesmos do contrato.'),
+  email({
+    id: 'ch-37', category: Category.Account, difficulty: 2, isScam: true, scamType: ScamType.PasswordPhishing,
+    context: 'Você usa o e-mail da faculdade fictícia Faculdade Brisa no domínio faculdadebrisa.example.',
+    redFlags: ['Pedido de senha em formulário externo', 'Ameaça de apagar arquivos por prazo curto'],
+    howToVerify: 'Acesse o portal da faculdade pelo endereço habitual e procure o suporte por lá.',
+    highlights: ['senha atual', 'conta-expirada.example'],
+    explanation: 'O formulário externo pede a senha que dá acesso à sua conta. A ameaça de perder arquivos tenta transformar uma tarefa de segurança em entrega de credenciais ao remetente.',
+  }, 'TI • Faculdade Brisa', 'suporte@conta-expirada.example', 'Sua senha expira hoje', 'Sua caixa de e-mail será bloqueada em duas horas. Informe sua senha atual em conta-expirada.example para preservar mensagens e arquivos.\n\nNão abra chamado: a atualização é automática pelo formulário.'),
+  email({
+    id: 'ch-38', category: Category.Investment, difficulty: 1, isScam: true, scamType: ScamType.GuaranteedReturn,
+    context: 'Você recebeu uma oferta não solicitada da plataforma fictícia CriptoNuvem.',
+    redFlags: ['Retorno alto garantido sem risco', 'Transferência imediata para reservar acesso'],
+    howToVerify: 'Pesquise a empresa, os riscos e as condições por fontes independentes antes de considerar qualquer investimento.',
+    highlights: ['retorno garantido', 'sem risco'],
+    explanation: 'A oferta combina uma promessa de ganho certo com ausência de risco para reduzir sua cautela. O percentual é parte da promessa fictícia do golpista, não uma expectativa confiável de rendimento.',
+  }, 'CriptoNuvem', 'convite@criptonuvem-renda.example', 'Seu dinheiro pode render todo dia', 'Nosso robô tem retorno garantido de 10% ao dia, sem risco e com saque livre.\n\nTransfira agora para reservar uma das vagas do grupo fechado. Não precisa entender do mercado.'),
+  email({
+    id: 'ch-39', category: Category.Documents, difficulty: 3, isScam: true, scamType: ScamType.FakeTax,
+    context: 'Você consultou o IPVA pelo canal responsável e não encontrou débitos. Este e-mail informa uma “diferença” nova.',
+    redFlags: ['Débito ausente na consulta independente', 'Pagamento direcionado a intermediário não reconhecido'],
+    howToVerify: 'Refaça a consulta no canal responsável e confirme o débito antes de emitir qualquer guia.',
+    highlights: ['parceiro arrecadador'],
+    explanation: 'O texto burocrático e o valor pequeno podem fazer a cobrança parecer rotineira. A divergência com a consulta independente e o destino desconhecido do pagamento são motivos concretos para interromper.',
+  }, 'ViaClara • conciliação', 'guias@viaclara-ajustes.example', 'Diferença residual de IPVA', 'Na conciliação foi identificada diferença residual de R$ 18,40. A guia deve ser quitada pelo nosso parceiro arrecadador indicado no anexo.\n\nO valor pode ainda não aparecer na consulta comum do veículo.'),
+  email({
+    id: 'ch-40', category: Category.Credit, difficulty: 2, isScam: true, scamType: ScamType.AdvanceLoanFee,
+    context: 'Você pesquisou empréstimos, mas não assinou contrato com a financeira CréditoVento.',
+    redFlags: ['Taxa para liberar valor emprestado', 'Cobrança em conta pessoal do consultor'],
+    howToVerify: 'Confirme a proposta diretamente com a instituição e examine o contrato sem depositar para “desbloquear” crédito.',
+    highlights: ['taxa de desbloqueio', 'conta do consultor'],
+    explanation: 'A oferta condiciona o empréstimo a um pagamento fora de um contrato confirmado. Usar a conta pessoal do consultor aumenta a distância entre a instituição anunciada e quem recebe o dinheiro.',
+  }, 'CréditoVento • consultoria', 'propostas@creditovento-liberacao.example', 'Proposta pré-aprovada', 'Seu crédito está pronto. Resta a taxa de desbloqueio de R$ 220 na conta do consultor responsável.\n\nAssim que o comprovante chegar, liberamos o empréstimo integral.'),
+  email({
+    id: 'ch-41', category: Category.Support, difficulty: 2, isScam: true, scamType: ScamType.RemoteAccess,
+    context: 'Você não pediu manutenção no computador e recebeu um suposto diagnóstico da TecBrisa.',
+    redFlags: ['Diagnóstico remoto sem atendimento iniciado', 'Solicitação para desativar a proteção do aparelho'],
+    howToVerify: 'Não instale o arquivo; consulte o suporte que você já conhece ou a ferramenta de segurança do aparelho.',
+    highlights: ['desative o antivírus', 'reparo-tecbrisa.exe'],
+    explanation: 'O remetente afirma conhecer um problema sem ter feito um atendimento verificável. Pedir para desativar a proteção antes de executar um arquivo remove uma barreira contra software malicioso.',
+  }, 'TecBrisa • suporte', 'diagnostico@tecbrisa-reparo.example', 'Falha detectada no seu computador', 'Detectamos uma ameaça no seu computador. Baixe reparo-tecbrisa.exe e desative o antivírus para concluir a correção.\n\nNosso atendente vai pedir o código da ferramenta para ajudar.'),
+  email({
+    id: 'ch-42', category: Category.Payment, difficulty: 3, isScam: true, scamType: ScamType.ChangedQr,
+    context: 'Você contratou o Ateliê Ipê. O QR do e-mail mostra no banco um recebedor diferente do contrato, sem relação confirmada com o ateliê.',
+    redFlags: ['QR direciona a recebedor diferente do contratado', 'Orientação para ignorar os dados do pagamento'],
+    howToVerify: 'Confira o recebedor antes de autorizar e confirme a cobrança com o ateliê pelo contato habitual.',
+    highlights: ['ignore o nome'],
+    explanation: 'Um QR code só preenche dados de uma operação; ele não garante a identidade de quem vai receber. A divergência no app bancário é mais relevante do que a apresentação profissional do e-mail.',
+  }, 'Ateliê Ipê • cobrança', 'pedidos@atelieipe-pagamentos.example', 'Pagamento do seu serviço', 'Enviamos o QR atualizado do seu serviço. Nosso intermediador mudou; ignore o nome que aparecer na leitura e confirme pelo valor.\n\nO recibo será enviado depois do pagamento.'),
+  email({
+    id: 'ch-43', category: Category.Bank, difficulty: 2, isScam: false,
+    context: 'Você usa BancoAzul no domínio bancoazul.example e a fatura citada está fechada no app.',
+    redFlags: [], howToVerify: 'Abra o app do banco por conta própria e confira a fatura antes de pagar.',
+    highlights: ['Não responda com dados'],
+    explanation: 'O aviso corresponde à fatura existente e direciona a consulta para o aplicativo já conhecido. O domínio coerente é um sinal de contexto, mas não substitui conferir o conteúdo dentro da conta.',
+  }, 'BancoAzul • faturas', 'faturas@bancoazul.example', 'Sua fatura está disponível', 'Sua fatura deste mês está disponível na área Cartões do app.\n\nNão responda com dados bancários ou de cartão. Consulte valores, vencimento e opções de pagamento diretamente no aplicativo.'),
+  email({
+    id: 'ch-44', category: Category.Job, difficulty: 1, isScam: false,
+    context: 'Você enviou currículo para o Estúdio Vento no domínio estudiovento.example. A etapa aparece no portal da candidatura.',
+    redFlags: [], howToVerify: 'Consulte o portal em que se candidatou e confirme a etapa e o remetente por lá.',
+    highlights: ['não exige compra'],
+    explanation: 'O retorno está ligado a uma candidatura feita por você e não cobra para participar. A possibilidade de confirmar a etapa no portal dá mais segurança do que apenas um logotipo no e-mail.',
+  }, 'Estúdio Vento • pessoas', 'pessoas@estudiovento.example', 'Próxima etapa da sua candidatura', 'Obrigado pelo interesse na vaga de assistente. A próxima etapa está no portal onde você se inscreveu.\n\nO processo não exige compra de curso, kit ou equipamento. Consulte o prazo na sua área de candidatura.'),
+  email({
+    id: 'ch-45', category: Category.Payment, difficulty: 3, isScam: false,
+    context: 'Você solicitou este boleto ao Ateliê Ipê em atelieipe.example. No app bancário, recebedor, valor e vencimento correspondem ao contrato.',
+    redFlags: [], howToVerify: 'Compare os dados da cobrança com o contrato no momento de autorizar o pagamento.',
+    highlights: ['Se houver divergência, não pague'],
+    explanation: 'O boleto é esperado e os dados do pagamento foram conferidos no banco, não apenas no documento. Receber uma cobrança por e-mail pode fazer parte de uma contratação legítima quando contexto e destino são confirmados.',
+  }, 'Ateliê Ipê', 'financeiro@atelieipe.example', 'Boleto solicitado • serviço contratado', 'Segue o boleto solicitado para o serviço do seu contrato. Confira valor, vencimento e beneficiário na tela do banco.\n\nSe houver divergência, não pague e fale conosco pelo atendimento que você já utiliza.'),
+  email({
+    id: 'ch-46', category: Category.Account, difficulty: 2, isScam: false,
+    context: 'Você acabou de alterar a senha no NuvemCaderno, cujo domínio conhecido é nuvemcaderno.example.',
+    redFlags: [], howToVerify: 'Confira os dispositivos conectados nas configurações do serviço que você abriu por conta própria.',
+    highlights: ['Não pedimos sua senha'],
+    explanation: 'A mensagem confirma uma ação que você iniciou e não pede credenciais em resposta. Se você não reconhecesse a alteração, deveria procurar a segurança da conta diretamente no serviço.',
+  }, 'NuvemCaderno', 'seguranca@nuvemcaderno.example', 'Sua senha foi alterada', 'Confirmamos a alteração de senha que você acabou de concluir. Não pedimos sua senha por e-mail.\n\nPara revisar os dispositivos conectados, abra as configurações do serviço pelo acesso que você já utiliza.'),
+  email({
+    id: 'ch-47', category: Category.Documents, difficulty: 3, isScam: false,
+    context: 'Você agendou atendimento no serviço fictício ViaClara e o protocolo 825 está confirmado no portal viaclara.example.',
+    redFlags: [], howToVerify: 'Consulte o protocolo no portal conhecido e confira local, documentos e horário.',
+    highlights: ['não cobra confirmação'],
+    explanation: 'A notificação coincide com um agendamento feito por você e confirmado de forma independente. Assuntos administrativos podem ser legítimos; a verificação do protocolo evita decidir apenas pelo tom formal.',
+  }, 'ViaClara • agendamento', 'agenda@viaclara.example', 'Confirmação do protocolo 825', 'Seu atendimento do protocolo 825 foi confirmado. Consulte local, horário e documentos no portal em que fez o agendamento.\n\nEste aviso não cobra confirmação nem pede envio de documentos por e-mail.'),
+  instagram({
+    id: 'ch-48', category: Category.Prize, difficulty: 1, isScam: true, scamType: ScamType.FakePrize,
+    context: 'Este perfil marcou você como vencedor de um sorteio em que não se inscreveu.',
+    redFlags: ['Sorteio sem participação prévia', 'Cobrança para validar o prêmio'],
+    howToVerify: 'Procure o organizador e o regulamento fora do perfil que fez o contato, sem pagar uma validação.',
+    highlights: ['taxa de validação'],
+    explanation: 'Ganhar algo sem reconhecer a participação é um motivo para conferir a origem do contato. A cobrança de uma “validação” converte a promessa de prêmio em pedido de dinheiro.',
+  }, 'clubebrisa_resgate', 'ClubeBrisa Prêmios', 'Parabéns, seu perfil ganhou um celular! Chame no direct e pague só a taxa de validação de R$ 35 para receber. Se não confirmar hoje, passa pro próximo.'),
+  instagram({
+    id: 'ch-49', category: Category.Investment, difficulty: 2, isScam: true, scamType: ScamType.GuaranteedReturn,
+    context: 'Um anúncio oferece um grupo de investimentos da RendaIpê, que você não conhece.',
+    redFlags: ['Promessa de duplicar depósito', 'Capturas de saldo apresentadas como garantia'],
+    howToVerify: 'Pesquise a empresa, as condições e os riscos fora do anúncio; não use prints de rendimento como comprovação.',
+    highlights: ['R$ 100 viram R$ 200', 'garantido'],
+    explanation: 'Capturas de saldo e depoimentos podem ser fabricados ou retirados de contexto. Prometer duplicação garantida do depósito troca a avaliação de risco por uma recompensa que o anunciante não comprova.',
+  }, 'renda_ipe_grupo', 'RendaIpê', 'Olha os prints dos alunos! Aqui R$ 100 viram R$ 200 no mesmo dia, garantido pelo nosso método. Faz o depósito de teste e entra no grupo exclusivo.'),
+  instagram({
+    id: 'ch-50', category: Category.Ticket, difficulty: 3, isScam: true, scamType: ScamType.FakeTicket,
+    context: 'Você procura ingresso para o Festival Vento. A organização permite transferência apenas na plataforma, mas o vendedor recusa esse procedimento.',
+    redFlags: ['Recusa da transferência autorizada pelo evento', 'Print de ingresso usado como única prova'],
+    howToVerify: 'Confira as regras com a organização e use o processo de transferência autorizado antes de pagar.',
+    highlights: ['só o print', 'fora da plataforma'],
+    explanation: 'Um print pode ser vendido para várias pessoas e não transfere a titularidade do ingresso. O ponto decisivo é o vendedor recusar o procedimento de transferência que o evento oferece.',
+  }, 'ingresso_vento_repasse', 'Repasse Festival Vento', 'Não vou conseguir ir. Passo pelo preço que paguei, sem ágio. Envio só o print do ingresso depois do Pix; a transferência faço fora da plataforma pra não ter demora.'),
+  instagram({
+    id: 'ch-51', category: Category.Marketplace, difficulty: 2, isScam: true, scamType: ScamType.AdvanceDeposit,
+    context: 'Você viu um anúncio de aluguel. A pessoa ainda não mostrou o imóvel nem comprovou poder alugá-lo.',
+    redFlags: ['Sinal antes da visita e da confirmação do locador', 'Pressão apoiada em outros interessados'],
+    howToVerify: 'Confirme a identidade e o vínculo do anunciante com o imóvel, faça visita e examine o contrato antes de pagar.',
+    highlights: ['sinal de R$ 500 antes da visita'],
+    explanation: 'As fotos de um imóvel podem ser copiadas de outro anúncio. Cobrar reserva antes de permitir a visita e verificar o locador desloca o risco inteiro para quem procura moradia.',
+  }, 'morada_ipe_ofertas', 'Morada Ipê', 'Apartamento perto da faculdade, aluguel abaixo da região. Tem bastante gente querendo. Reservo com sinal de R$ 500 antes da visita, porque estou viajando esta semana.'),
+  instagram({
+    id: 'ch-52', category: Category.Marketplace, difficulty: 1, isScam: true, scamType: ScamType.AdvanceDeposit,
+    context: 'Você encontrou um carro muito abaixo dos anúncios semelhantes e não viu o veículo nem seus documentos.',
+    redFlags: ['Depósito para obter endereço da visita', 'Veículo e propriedade ainda não verificados'],
+    howToVerify: 'Verifique veículo, documentação e legitimidade do vendedor antes de negociar qualquer sinal.',
+    highlights: ['R$ 300 pra liberar o endereço'],
+    explanation: 'Pagar para descobrir onde ver um carro não confirma que ele existe ou pertence ao anunciante. O preço baixo serve para tornar aceitável uma transferência antes das verificações básicas.',
+  }, 'garagem_nuvem_urgente', 'Garagem Nuvem', 'Carro impecável pela metade do preço, preciso vender hoje! Manda R$ 300 pra liberar o endereço e garantir a visita. Sem sinal não passo a localização.'),
+  instagram({
+    id: 'ch-53', category: Category.Shopping, difficulty: 3, isScam: true, scamType: ScamType.FakeInfluencer,
+    context: 'Você segue a criadora fictícia Nina Ventomar. Este perfil tem uma letra extra no usuário e não é citado nos canais que você já segue.',
+    redFlags: ['Nome de usuário diferente do perfil conhecido', 'Pagamento por mensagem fora do canal da promoção'],
+    howToVerify: 'Abra o perfil que você já seguia e confirme se a promoção e o parceiro foram divulgados por ele.',
+    highlights: ['Pix no direct'],
+    explanation: 'Foto, linguagem e até publicações podem ser copiadas de uma criadora. O usuário diferente e o pedido de pagamento por mensagem precisam ser conferidos no perfil que você já conhecia.',
+  }, 'nina_ventomarr', 'Nina Ventomar', 'Pessoal, parceria nova com a CaixaBrisa! Separei kits com desconto pros seguidores. Quem quiser reservar manda Pix no direct; o link da loja ainda está sendo atualizado.'),
+  instagram({
+    id: 'ch-54', category: Category.Debt, difficulty: 2, isScam: true, scamType: ScamType.FakeDebt,
+    context: 'Um anúncio da AcordoNuvem promete retirar dívidas sem contato com os credores.',
+    redFlags: ['Promessa de apagar dívida sem negociação', 'Cobrança antecipada por um resultado garantido'],
+    howToVerify: 'Consulte o credor diretamente e peça os termos de qualquer acordo por um canal confirmado.',
+    highlights: ['sem falar com o credor', 'taxa única'],
+    explanation: 'O anúncio oferece eliminar uma obrigação sem explicar negociação ou base para isso. A taxa única compra uma promessa sem termos verificáveis, mesmo que os comentários pareçam positivos.',
+  }, 'acordonuvem_rapido', 'AcordoNuvem', 'Nome limpo sem falar com o credor! Qualquer dívida sai hoje com nossa taxa única de R$ 49. Resultado garantido. Consulte pelo direct, não precisa de contrato.'),
+  instagram({
+    id: 'ch-55', category: Category.Payment, difficulty: 2, isScam: true, scamType: ScamType.ChangedQr,
+    context: 'Você quer doar à campanha Abrigo Vento. No canal conhecido da campanha, o recebedor é Abrigo Vento; o QR deste repost mostra outra pessoa.',
+    redFlags: ['Recebedor diferente do informado pela campanha', 'Repost substitui o destino da doação'],
+    howToVerify: 'Obtenha os dados de doação no canal já conhecido da campanha e confira o nome antes de autorizar.',
+    highlights: ['use só o QR deste post'],
+    explanation: 'Repostar uma campanha verdadeira com outro QR pode desviar doações para uma pessoa sem vínculo com ela. Compare o destino no app bancário com o informado pelo organizador original.',
+  }, 'apoio_abrigo_vento', 'Apoio ao Abrigo Vento', 'Estamos ajudando a campanha do abrigo. O QR anterior lotou: use só o QR deste post. Se aparecer outro nome, pode confirmar, depois repassamos tudo.'),
+  instagram({
+    id: 'ch-56', category: Category.Job, difficulty: 1, isScam: false,
+    context: 'Você acompanha o perfil do Estúdio Vento e a mesma vaga está no site que já conhecia.',
+    redFlags: [], howToVerify: 'Procure a vaga na área de carreiras do site conhecido e confira as etapas antes de enviar dados.',
+    highlights: ['sem taxa'],
+    explanation: 'A publicação permite verificar a vaga fora da rede social e não cobra por acesso à seleção. Isso não dispensa ler os requisitos e limitar os dados enviados ao necessário para a candidatura.',
+  }, 'estudiovento', 'Estúdio Vento', 'Abrimos seleção para assistente. Requisitos e etapas na área de carreiras do nosso site. Candidatura gratuita, sem taxa ou compra de material. Prazo e condições na página da vaga.'),
+  instagram({
+    id: 'ch-57', category: Category.Ticket, difficulty: 3, isScam: false,
+    context: 'Você já acompanha o Festival Vento. A publicação informa o mesmo procedimento de revenda que consta no regulamento consultado por você.',
+    redFlags: [], howToVerify: 'Acesse a plataforma pelo caminho divulgado no regulamento conhecido e confira as regras de transferência.',
+    highlights: ['não envie Pix pelo direct'],
+    explanation: 'A orientação preserva o procedimento de emissão e transferência que você confirmou no regulamento. Comprar ou revender ingresso pode ser legítimo quando a titularidade é tratada pelo processo autorizado.',
+  }, 'festivalvento', 'Festival Vento', 'Vai repassar o ingresso? Use a função de transferência da plataforma indicada no regulamento. Confira as condições antes de combinar a venda e não envie Pix pelo direct deste perfil.'),
+  instagram({
+    id: 'ch-58', category: Category.Marketplace, difficulty: 2, isScam: false,
+    context: 'Você confirmou a identidade da anunciante e o vínculo dela com o imóvel pelos documentos e pelo atendimento já conhecido.',
+    redFlags: [], howToVerify: 'Visite o imóvel, confira documentação e leia as condições do contrato antes de assumir compromisso.',
+    highlights: ['sem cobrança de reserva'],
+    explanation: 'A proposta permite visitar e verificar o contrato antes de pagar, com a anunciante já identificada no cenário. Um anúncio de aluguel não é fraude só por estar em rede social; o processo de verificação é que importa.',
+  }, 'moradaipe_atendimento', 'Morada Ipê • imóveis', 'Visitas ao apartamento disponíveis nesta semana, sem cobrança de reserva. Contrato e documentos podem ser consultados antes da assinatura. Combine um horário pelo atendimento que você já conhece.'),
+  instagram({
+    id: 'ch-59', category: Category.Investment, difficulty: 3, isScam: false,
+    context: 'Você acompanha o perfil educativo fictício Caderno de Bolso. O post não oferece produto nem pede depósitos.',
+    redFlags: [], howToVerify: 'Compare o material com outras fontes independentes e avalie riscos e custos antes de contratar produtos.',
+    highlights: ['Não existe ganho certo'],
+    explanation: 'O conteúdo trata de risco e planejamento sem prometer rendimento ou pedir transferência. Falar de investimentos não torna uma publicação fraudulenta; ofertas de produtos exigiriam verificações adicionais.',
+  }, 'caderno_de_bolso', 'Caderno de Bolso', 'Antes de investir, entenda riscos, prazo e custos e pense na sua reserva. Não existe ganho certo para toda situação. Este post é educativo: não recebemos depósitos nem oferecemos grupos de sinais.'),
+  instagram({
+    id: 'ch-60', category: Category.Prize, difficulty: 1, isScam: false,
+    context: 'Você segue a Feira Ipê e já consultou o regulamento desta ação no canal da organização.',
+    redFlags: [], howToVerify: 'Leia o regulamento no canal já conhecido e confira como serão anunciados e atendidos os contemplados.',
+    highlights: ['Não cobramos frete'],
+    explanation: 'A ação apresenta regras que você pode consultar e não condiciona a entrega a uma transferência. A confirmação no canal conhecido continua necessária se alguém aparecer depois cobrando uma taxa.',
+  }, 'feira_ipe', 'Feira Ipê', 'O sorteio gratuito da feira está aberto! Regras e prazo no regulamento da organização. Não cobramos frete, taxa de cadastro ou Pix para entregar prêmios. Consulte antes de participar.'),
 ];
