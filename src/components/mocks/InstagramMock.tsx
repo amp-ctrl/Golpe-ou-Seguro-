@@ -1,11 +1,12 @@
+import { HighlightedText, type HighlightProps } from '../HighlightedText';
 import React from 'react';
 import type { InstagramContent } from '../../data/challenges';
 
-interface Props {
+interface Props extends HighlightProps {
   content: InstagramContent;
 }
 
-export const InstagramMock: React.FC<Props> = ({ content }) => {
+export const InstagramMock: React.FC<Props> = ({ content, highlights, highlightTone }) => {
   return (
     <div className="mock-device-screen mock-instagram" aria-label="Simulação de publicação no Instagram">
       {/* Cabeçalho do Perfil Instagram */}
@@ -18,7 +19,7 @@ export const InstagramMock: React.FC<Props> = ({ content }) => {
           </div>
           <div className="ig-user-meta">
             <div className="ig-username-line">
-              <span className="ig-username">{content.username}</span>
+              <span className="ig-username"><HighlightedText text={content.username} highlights={highlights} highlightTone={highlightTone} /></span>
             </div>
             <span className="ig-followers-text">{content.followersText}</span>
           </div>
@@ -78,8 +79,8 @@ export const InstagramMock: React.FC<Props> = ({ content }) => {
       {/* Legenda e Comentários */}
       <div className="ig-caption-block">
         <p className="ig-caption-text">
-          <strong className="ig-caption-author">{content.username}</strong>{' '}
-          <span className="mock-balloon-text">{content.caption}</span>
+          <strong className="ig-caption-author"><HighlightedText text={content.username} highlights={highlights} highlightTone={highlightTone} /></strong>{' '}
+          <span className="mock-balloon-text"><HighlightedText text={content.caption} highlights={highlights} highlightTone={highlightTone} /></span>
         </p>
 
         <span className="ig-comments-link">{content.commentsText}</span>

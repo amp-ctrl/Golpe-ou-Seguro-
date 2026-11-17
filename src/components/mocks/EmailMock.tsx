@@ -1,11 +1,12 @@
+import { HighlightedText, type HighlightProps } from '../HighlightedText';
 import React from 'react';
 import type { EmailContent } from '../../data/challenges';
 
-interface Props {
+interface Props extends HighlightProps {
   content: EmailContent;
 }
 
-export const EmailMock: React.FC<Props> = ({ content }) => {
+export const EmailMock: React.FC<Props> = ({ content, highlights, highlightTone }) => {
   return (
     <div className="mock-device-screen mock-email" aria-label="Simulação de cliente de E-mail">
       {/* Barra de Ações do Cliente de E-mail */}
@@ -34,7 +35,7 @@ export const EmailMock: React.FC<Props> = ({ content }) => {
       {/* Conteúdo do E-mail */}
       <div className="email-content-area">
         <div className="email-subject-box">
-          <h3 className="email-subject-text">{content.subject}</h3>
+          <h3 className="email-subject-text"><HighlightedText text={content.subject} highlights={highlights} highlightTone={highlightTone} /></h3>
           <span className="email-inbox-tag">Caixa de entrada</span>
         </div>
 
@@ -44,12 +45,12 @@ export const EmailMock: React.FC<Props> = ({ content }) => {
           </div>
           <div className="email-meta-info">
             <div className="email-sender-line">
-              <span className="email-from-name">{content.senderName}</span>
+              <span className="email-from-name"><HighlightedText text={content.senderName} highlights={highlights} highlightTone={highlightTone} /></span>
               <span className="email-date-text">{content.date}</span>
             </div>
             <div className="email-address-line">
               <span>De: </span>
-              <span className="mock-unclickable-text">{content.senderEmail}</span>
+              <span className="mock-unclickable-text"><HighlightedText text={content.senderEmail} highlights={highlights} highlightTone={highlightTone} /></span>
             </div>
             <div className="email-to-line">
               <span>Para: mim</span>
@@ -60,7 +61,7 @@ export const EmailMock: React.FC<Props> = ({ content }) => {
         <div className="email-body-scroll">
           {content.bodyText.split('\n\n').map((paragraph, index) => (
             <p key={index} className="email-paragraph mock-balloon-text">
-              {paragraph}
+              <HighlightedText text={paragraph} highlights={highlights} highlightTone={highlightTone} />
             </p>
           ))}
         </div>

@@ -1,11 +1,12 @@
+import { HighlightedText, type HighlightProps } from '../HighlightedText';
 import React from 'react';
 import type { SmsContent } from '../../data/challenges';
 
-interface Props {
+interface Props extends HighlightProps {
   content: SmsContent;
 }
 
-export const SmsMock: React.FC<Props> = ({ content }) => {
+export const SmsMock: React.FC<Props> = ({ content, highlights, highlightTone }) => {
   return (
     <div className="mock-device-screen mock-sms" aria-label="Simulação de mensagem de SMS">
       {/* Cabeçalho do App de SMS */}
@@ -39,7 +40,7 @@ export const SmsMock: React.FC<Props> = ({ content }) => {
         </div>
 
         <div className="sms-bubble">
-          <p className="sms-text mock-balloon-text">{content.messageText}</p>
+          <p className="sms-text mock-balloon-text"><HighlightedText text={content.messageText} highlights={highlights} highlightTone={highlightTone} /></p>
         </div>
 
         <div className="sms-delivery-note">

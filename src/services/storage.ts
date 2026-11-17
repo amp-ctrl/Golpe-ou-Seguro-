@@ -1,7 +1,9 @@
+import { accumulate, emptyStats, isSessionRecord, isTrainingState, type CategoryStats, type SessionRecord, type TrainingState } from './results';
+import type { Category } from '../data/challenges';
 import type { SeenSession } from './sessionBuilder';
 
 const STORAGE_PREFIX = 'cid_jogo_v1_';
-const SCHEMA_VERSION = 1;
+const SCHEMA_VERSION = 2;
 interface StorageEnvelope<T> { schemaVersion: number; updatedAt: string; data: T }
 export interface StorageBackend {
   getItem(key: string): string | null;
@@ -32,7 +34,8 @@ export class StorageService {
       if (!raw) return defaultValue ?? null;
       const envelope: unknown = JSON.parse(raw);
       if (typeof envelope !== 'object' || envelope === null ||
-        !('schemaVersion' in envelope) || envelope.schemaVersion !== SCHEMA_VERSION || !('data' in envelope)) {
+        !('schemaVersion' in envelope) ||
+        !(envelope.schemaVersion === SCHEMA_VERSION || (envelope.schemaVersion === 1 && ['best_score', 'seen_sessions'].includes(key))) || !('data' in envelope)) {
         return defaultValue ?? null;
       }
       return (envelope.data as T) ?? defaultValue ?? null;
@@ -79,6 +82,26 @@ export class StorageService {
       return score;
     }
     return best;
+  }
+
+  public getTrainingState(): TrainingState {
+    const value = this.get<unknown>('results');
+    return isTrainingState(value) ? value : { sessions: [], categoryStats: {} };
+  }
+
+  public getSessionHistory(): SessionRecord[] { return this.getTrainingState().sessions; }
+  public getCategoryStats(): Partial<Record<Category, CategoryStats>> { return this.getTrainingState().categoryStats; }
+
+  /** Histórico limitado a dez partidas; estatísticas acumuladas não são truncadas. */
+  public saveSession(session: SessionRecord): void {
+    if (!isSessionRecord(session)) return;
+    const state = this.getTrainingState();
+    if (state.sessions.some(({ id }) => id === session.id)) return;
+    for (const answer of session.answers) {
+      state.categoryStats[answer.category] = accumulate(state.categoryStats[answer.category] ?? emptyStats(), answer);
+    }
+    state.sessions = [...state.sessions, session].slice(-10);
+    this.set('results', state);
   }
 
   public getSeenSessions(): SeenSession[] {

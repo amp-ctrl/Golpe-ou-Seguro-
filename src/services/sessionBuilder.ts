@@ -1,4 +1,4 @@
-import type { Challenge } from '../data/challenges';
+import type { Category, Challenge } from '../data/challenges';
 
 export const SESSION_SIZES = [10, 15, 20] as const;
 export type SessionSize = (typeof SESSION_SIZES)[number];
@@ -8,6 +8,7 @@ export interface SessionOptions {
   size?: SessionSize;
   history?: readonly SeenSession[];
   seed?: number | string;
+  focusCategories?: readonly Category[];
 }
 
 function seededRandom(seed: number | string): () => number {
@@ -30,7 +31,7 @@ function seededRandom(seed: number | string): () => number {
  * Históricos afetam pesos, não proíbem rever uma questão em outra partida.
  */
 export function buildSession(pool: readonly Challenge[], options: SessionOptions = {}): Challenge[] {
-  const { size = 10, history = [], seed } = options;
+  const { size = 10, history = [], seed, focusCategories = [] } = options;
   if (!SESSION_SIZES.includes(size)) throw new Error('Tamanho de partida inválido. Use 10, 15 ou 20.');
   if (new Set(pool.map(({ id }) => id)).size !== pool.length) {
     throw new Error('O banco contém IDs repetidos.');
@@ -107,7 +108,8 @@ export function buildSession(pool: readonly Challenge[], options: SessionOptions
     }).map((challenge) => {
       const timesSeen = frequency.get(challenge.id) ?? 0;
       // Corrida exponencial: peso 1 para inéditas, 1/4, 1/9 e 1/16 para já vistas.
-      const weight = 1 / (1 + timesSeen) ** 2;
+      const focusWeight = focusCategories.includes(challenge.category) ? 32 : 1;
+      const weight = focusWeight / (1 + timesSeen) ** 2;
       return { challenge, priority: -Math.log(Math.max(random(), Number.EPSILON)) / weight };
     }).sort((a, b) => a.priority - b.priority);
 

@@ -1,11 +1,12 @@
+import { HighlightedText, type HighlightProps } from '../HighlightedText';
 import React from 'react';
 import type { WhatsAppContent } from '../../data/challenges';
 
-interface Props {
+interface Props extends HighlightProps {
   content: WhatsAppContent;
 }
 
-export const WhatsAppMock: React.FC<Props> = ({ content }) => {
+export const WhatsAppMock: React.FC<Props> = ({ content, highlights, highlightTone }) => {
   return (
     <div className="mock-device-screen mock-whatsapp" aria-label="Simulação de mensagem do WhatsApp">
       {/* Barra do App WhatsApp */}
@@ -50,9 +51,9 @@ export const WhatsAppMock: React.FC<Props> = ({ content }) => {
 
         <div className="wa-balloon">
           {content.isGroup && (
-            <span className="wa-balloon-author">{content.senderName}</span>
+            <span className="wa-balloon-author"><HighlightedText text={content.senderName} highlights={highlights} highlightTone={highlightTone} /></span>
           )}
-          <p className="wa-balloon-text mock-balloon-text">{content.messageText}</p>
+          <p className="wa-balloon-text mock-balloon-text"><HighlightedText text={content.messageText} highlights={highlights} highlightTone={highlightTone} /></p>
           <div className="wa-balloon-meta">
             <span className="wa-balloon-time">{content.time}</span>
             <svg className="wa-checks" viewBox="0 0 18 12" fill="none" stroke="currentColor" strokeWidth="1.75" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">

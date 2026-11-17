@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { INITIAL_CHALLENGES, type Challenge } from '../data/challenges';
+import { Category, INITIAL_CHALLENGES, type Challenge } from '../data/challenges';
 import { buildSession, SESSION_SIZES, type SeenSession, type SessionSize } from './sessionBuilder';
 
 function assertRules(session: Challenge[], size: SessionSize, history: SeenSession[]) {
@@ -81,4 +81,23 @@ describe('buildSession', () => {
     expect(() => buildSession([...INITIAL_CHALLENGES, INITIAL_CHALLENGES[0]])).toThrow(/repetidos/);
     expect(() => buildSession(INITIAL_CHALLENGES.filter((q) => q.isScam))).toThrow(/todas as regras/);
   });
+});
+
+describe('treino focado', () => {
+  it('prioriza os pontos fracos sem violar as regras em 1.000 partidas de tamanhos variados', () => {
+    const categories = Object.values(Category);
+    let history: SeenSession[] = [];
+    let focusedCount = 0;
+    let baselineCount = 0;
+    for (let seed = 0; seed < 1000; seed++) {
+      const size = SESSION_SIZES[seed % SESSION_SIZES.length];
+      const focusCategories = seed % 2 ? [categories[seed % categories.length]] : [categories[seed % categories.length], categories[(seed + 1) % categories.length]];
+      const session = buildSession(INITIAL_CHALLENGES, { size, history, seed, focusCategories });
+      assertRules(session, size, history);
+      focusedCount += session.filter((q) => focusCategories.includes(q.category)).length;
+      baselineCount += buildSession(INITIAL_CHALLENGES, { size, history, seed }).filter((q) => focusCategories.includes(q.category)).length;
+      history = [...history, { ids: session.map(({ id }) => id) }].slice(-3);
+    }
+    expect(focusedCount).toBeGreaterThan(baselineCount * 1.3);
+  }, 30_000);
 });

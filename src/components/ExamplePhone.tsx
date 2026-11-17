@@ -1,12 +1,12 @@
 import { useEffect, useRef, type ReactNode } from 'react';
 
-export function ExamplePhone({ children, messageId }: { children: ReactNode; messageId: string }) {
+export function ExamplePhone({ children, messageId, variant = 'example' }: { children: ReactNode; messageId: string; variant?: 'example' | 'game' }) {
   const screenRef = useRef<HTMLDivElement>(null);
   useEffect(() => {
     if (screenRef.current) screenRef.current.scrollTop = 0;
   }, [messageId]);
   return (
-    <div className="device-chassis device-chassis--example">
+    <div className={`device-chassis device-chassis--${variant}`}>
       <div className="device-status-bar" aria-hidden="true">
         <span className="device-clock">14:32</span>
         <div className="device-camera-notch" />
@@ -24,7 +24,7 @@ export function ExamplePhone({ children, messageId }: { children: ReactNode; mes
           </svg>
         </div>
       </div>
-      <div ref={screenRef} className="device-screen-content" role="region" aria-label="Mensagem de exemplo; role para ler o conteúdo completo" tabIndex={0}>
+      <div ref={screenRef} className="device-screen-content" role="region" aria-label={variant === 'game' ? 'Mensagem do desafio; role para ler o conteúdo completo' : 'Mensagem de exemplo; role para ler o conteúdo completo'} tabIndex={0}>
         {children}
       </div>
     </div>

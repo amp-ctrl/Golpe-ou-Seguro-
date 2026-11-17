@@ -41,6 +41,11 @@
   --color-success-subtle: rgba(46, 157, 104, 0.12);
   --color-success-border: rgba(46, 157, 104, 0.4);
 
+  /* Texto de feedback e bordas de controles com contraste sobre superfícies escuras. */
+  --color-success-text: #8BDBB5;
+  --color-danger-text: #FFA6A7;
+  --color-border-control: #7D8490;
+
   /* Acessibilidade */
   --color-focus: #E05D38;
   --focus-ring: 2px solid var(--color-focus);
