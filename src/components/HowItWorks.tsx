@@ -1,4 +1,4 @@
-const STEPS = ['Leia a mensagem', 'Decida Golpe ou Segura', 'Aprenda o porquê'];
+const STEPS = ['Leia a mensagem', 'Decida se é golpe ou segura', 'Aprenda o porquê'];
 
 export function HowItWorks() {
   return (

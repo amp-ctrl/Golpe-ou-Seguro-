@@ -44,7 +44,7 @@ export const SmsMock: React.FC<Props> = ({ content, highlights, highlightTone })
         </div>
 
         <div className="sms-delivery-note">
-          <span>SMS • Operadora Móvel</span>
+          <span>SMS • operadora móvel</span>
         </div>
       </div>
     </div>

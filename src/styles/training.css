@@ -23,9 +23,6 @@
 .device-chassis--game .mock-balloon-text { font-size: clamp(0.9375rem, 0.9vw, 1.0625rem); line-height: 1.6; }
 .decision-area { display: grid; gap: 16px; }
 .decision-area > p { color: var(--color-text-secondary); font-size: 0.9375rem; }
-.keyboard-hint { display: flex; flex-wrap: wrap; align-items: center; justify-content: center; gap: 6px; color: var(--color-text-secondary); font-size: 0.6875rem; margin-top: 16px; }
-.keyboard-hint > span { padding-inline: 4px; }
-kbd { font: inherit; border: 1px solid var(--color-border-strong); border-radius: 3px; padding: 1px 5px; color: var(--color-text-primary); }
 .answer-feedback { display: grid; gap: 12px; padding: 16px; border: 1px solid var(--color-border-strong); border-left: 3px solid var(--color-danger); border-radius: var(--radius-md); background: var(--color-bg-card); animation: feedback-reveal 180ms ease-out; }
 .answer-feedback--correct { border-left-color: var(--color-success); }
 .answer-feedback-heading { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
@@ -82,11 +79,6 @@ kbd { font: inherit; border: 1px solid var(--color-border-strong); border-radius
 .weak-spots h3 { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 8px; font-size: 0.9375rem; margin-bottom: 6px; }
 .weak-spots h3 span { color: var(--color-text-secondary); font-size: 0.75rem; font-weight: 400; }
 .weak-spots .lifetime-note { font-size: 0.6875rem; margin-top: 6px; }
-.recent-results { border: 1px solid var(--color-border-strong); border-radius: var(--radius-sm); }
-.recent-results summary { min-height: 48px; padding: 12px 16px; cursor: pointer; font-size: 0.8125rem; }
-.recent-results ol { padding: 0 16px 16px 36px; color: var(--color-text-secondary); font-size: 0.75rem; }
-.recent-results li { padding-bottom: 10px; }
-.recent-results time, .recent-results li > span { display: block; }
 .section-description, .empty-message { font-size: 0.8125rem; color: var(--color-text-secondary); line-height: 1.6; }
 .section-description { margin-bottom: 16px; }
 .performance-bars { display: grid; gap: 16px; list-style: none; }
@@ -107,10 +99,7 @@ kbd { font: inherit; border: 1px solid var(--color-border-strong); border-radius
 .review-item-title strong { font-weight: 500; }
 .review-outcome { display: flex; gap: 10px; align-items: center; white-space: nowrap; color: var(--color-danger-text); font-size: 0.6875rem; }
 .review-outcome--correct { color: var(--color-success-text); }
-.review-outcome > span { font-size: 1.25rem; color: var(--color-text-secondary); }
-.review-item[open] .review-outcome > span { transform: rotate(45deg); }
 .review-body { display: grid; gap: 16px; padding: 0 16px 20px; }
-.review-answers { font-size: 0.8125rem; line-height: 1.6; }
 .review-context { color: var(--color-text-secondary); font-size: 0.8125rem; line-height: 1.6; }
 .review-mock { border: 1px solid var(--color-border-strong); border-radius: 14px; overflow: hidden; min-width: 0; }
 .review-mock .mock-device-screen { min-height: 240px; }
@@ -131,7 +120,6 @@ kbd { font: inherit; border: 1px solid var(--color-border-strong); border-radius
   .result-performance-grid, .result-safety-grid, .review-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; }
   .review-item[open] { grid-column: 1 / -1; }
   .review-body { grid-template-columns: minmax(0, 0.8fr) minmax(0, 1.2fr); gap: 16px 24px; }
-  .review-answers, .review-context { grid-column: 1 / -1; }
   .review-body .question-explanation { align-self: start; }
 }
 @media (min-width: 1200px) { .category-performance .performance-bars { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px 24px; } }
@@ -147,6 +135,63 @@ kbd { font: inherit; border: 1px solid var(--color-border-strong); border-radius
   .copy-result { grid-column: 2; grid-row: 2; }
   .focus-explainer { grid-row: 3; }
 }
-.keyboard-shortcuts { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; column-gap: 12px; margin-top: 8px; }
-.keyboard-shortcuts .keyboard-hint { margin-top: 0; }
-.shortcut-toggle { min-width: 48px; min-height: 48px; padding: 8px; font-size: 0.6875rem; color: var(--color-text-secondary); text-decoration: underline; text-underline-offset: 3px; }
+
+/* Resultado: blocos equilibrados e leitura sem painéis sobrepostos. */
+.result-eyebrow { text-transform: none; letter-spacing: 0.02em; font-size: 0.875rem; }
+.result-overview { align-items: stretch; }
+.result-insights { grid-template-rows: auto 1fr; }
+.error-indicator { display: flex; flex-direction: column; }
+.error-indicator h2 { min-height: 2.7em; }
+.error-indicator p { margin-top: auto; }
+.result-safety-grid { align-items: stretch; }
+.result-safety-grid > .result-card { display: flex; flex-direction: column; height: 100%; padding: 24px; }
+.result-safety-grid .safety-list { flex: 1; align-content: space-between; gap: 16px; line-height: 1.7; font-size: 0.875rem; }
+.result-safety-grid h2 { margin-bottom: 20px; }
+
+.review-item { position: relative; border-color: var(--color-border); border-radius: var(--radius-md); }
+.review-item > summary { gap: 16px; padding: 16px 20px; }
+.review-item-title { flex: 1; }
+.review-item-title > span { font-size: 0.8125rem; }
+.review-outcome { font-size: 0.8125rem; }
+.review-toggle { font-size: 1.5rem; font-weight: 400; color: var(--color-text-secondary); }
+.review-item[open] > summary { border-bottom: 1px solid var(--color-border); padding-right: 120px; }
+.review-item[open] > summary .review-outcome, .review-item[open] .review-toggle { display: none; }
+.review-close { position: absolute; top: 12px; right: 16px; display: inline-flex; align-items: center; gap: 8px; min-height: 48px; padding: 8px 12px; color: var(--color-text-secondary); font-size: 0.875rem; border: 1px solid transparent; border-radius: var(--radius-sm); }
+.review-close svg { width: 20px; height: 20px; }
+.review-close:hover { color: var(--color-text-primary); border-color: var(--color-border-strong); }
+.review-body { padding: 24px 20px; gap: 28px; align-items: start; }
+.review-message-column { min-width: 0; }
+.review-mock { max-width: 440px; margin-inline: auto; border-color: var(--color-border); }
+.review-mock .mock-balloon-text { font-size: 0.875rem; }
+.review-context { margin: 16px auto 0; max-width: 440px; font-size: 0.8125rem; line-height: 1.7; }
+.review-context > span { display: block; color: var(--color-text-primary); font-size: 0.75rem; margin-bottom: 4px; }
+.review-analysis { display: grid; gap: 20px; min-width: 0; align-content: start; }
+.review-analysis-header { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+.review-status { padding: 5px 12px; border: 1px solid; border-radius: var(--radius-full); font-size: 0.875rem; font-weight: 500; line-height: 1.5; }
+.review-status--scam { background: var(--color-accent-subtle); border-color: var(--color-accent-border); color: var(--color-text-primary); }
+.review-status--safe { background: var(--color-success-subtle); border-color: var(--color-success-border); color: var(--color-success-text); }
+.review-analysis-header p { font-size: 0.875rem; line-height: 1.6; color: var(--color-text-secondary); }
+.review-analysis-header strong { color: var(--color-text-primary); font-weight: 400; }
+.question-explanation--review { gap: 24px; }
+.question-explanation--review h3 { font-size: 0.9375rem; font-weight: 500; margin-bottom: 10px; }
+.question-explanation--review .explanation-copy { font-size: 1rem; line-height: 1.7; display: -webkit-box; -webkit-line-clamp: 3; -webkit-box-orient: vertical; overflow: hidden; }
+.observed-signals { display: grid; gap: 10px; padding-left: 18px; }
+.observed-signals li, .review-action p { color: var(--color-text-secondary); font-size: 0.9375rem; line-height: 1.7; }
+.observed-signals li::marker { color: var(--color-accent); }
+.review-analysis--safe .observed-signals li::marker { color: var(--color-success-text); }
+.review-action { padding-top: 20px; border-top: 1px solid var(--color-border); }
+@media (min-width: 1024px) {
+  .review-body { grid-template-columns: minmax(0, 0.85fr) minmax(0, 1.15fr); gap: 40px; padding: 28px; }
+}
+@media (max-width: 639px) {
+  .review-item > summary { padding-inline: 16px; gap: 10px; }
+  .review-item[open] > summary { padding-right: 112px; }
+  .review-close { right: 8px; }
+  .review-body { padding: 20px 16px; }
+  .result-safety-grid > .result-card { padding: 20px; }
+}
+
+/* Nomes de usuário permanecem em uma linha, como no aplicativo. */
+.review-mock .ig-header-user { flex: 1; min-width: 0; }
+.review-mock .ig-username-line { flex-wrap: nowrap; min-width: 0; }
+.review-mock .ig-username { min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; overflow-wrap: normal; }

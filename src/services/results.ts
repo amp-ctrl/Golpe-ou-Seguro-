@@ -1,5 +1,6 @@
 import { Category, type ChannelType } from '../data/challenges';
 import { CATEGORY_INFO } from '../data/guidance';
+import { formatCount } from './text';
 import { SESSION_SIZES, type SessionSize } from './sessionBuilder';
 
 export interface AnswerRecord {
@@ -58,20 +59,20 @@ export function analyzeAnswers(answers: readonly AnswerRecord[]) {
 }
 
 export function getProfile(correct: number, answered: number) {
-  if (!answered) return { title: 'Treino por começar', text: 'Responda algumas mensagens para descobrir o que merece mais atenção.' };
+  if (!answered) return { title: 'Treino por começar', text: 'Responda às mensagens para ver seu desempenho.' };
   const accuracy = correct / answered * 100;
-  if (accuracy >= 90) return { title: 'Caçador de golpes', text: 'Você distinguiu bem os sinais desta partida. Continue conferindo o contexto e o destino de cada pagamento.' };
-  if (accuracy >= 70) return { title: 'Radar ligado', text: 'Você reconheceu boa parte dos sinais. Rever os erros ajuda a perceber detalhes menos óbvios.' };
-  if (accuracy >= 40) return { title: 'Desconfiado', text: 'Você já percebe alguns sinais. Agora vale diferenciar pedidos suspeitos de mensagens legítimas com contexto confirmado.' };
-  return { title: 'Começando a observar', text: 'Use a revisão para entender cada situação. Uma pausa e uma checagem independente podem mudar sua próxima decisão.' };
+  if (accuracy >= 90) return { title: 'Caçador de golpes', text: 'Você reconheceu os principais sinais de golpe nesta partida.' };
+  if (accuracy >= 70) return { title: 'Radar ligado', text: 'Reveja os erros para perceber os detalhes que passaram.' };
+  if (accuracy >= 40) return { title: 'Desconfiado', text: 'Confira o contexto antes de decidir se a mensagem é segura.' };
+  return { title: 'Começando a observar', text: 'Use a revisão para entender os sinais de cada mensagem.' };
 }
 
 export function shareResult(session: SessionRecord): string {
   const stats = analyzeAnswers(session.answers);
   return [
-    'Consumo Impulsivo e Golpes Digitais — Treine para não cair',
-    stats.answered ? `${stats.correct}/${stats.answered} acertos (${stats.accuracy}%) · ${stats.score} pontos.` : 'Partida encerrada sem respostas.',
-    `${stats.answered} de ${session.size} questões respondidas.`,
+    'Consumo impulsivo e golpes digitais — Treine para não cair',
+    stats.answered ? `${stats.correct}/${stats.answered} ${stats.correct === 1 ? 'acerto' : 'acertos'} (${stats.accuracy}%) · ${formatCount(stats.score, 'ponto', 'pontos')}.` : 'Partida encerrada sem respostas.',
+    `${formatCount(stats.answered, 'questão respondida', 'questões respondidas')} de ${session.size}.`,
     `Golpes aceitos como seguros: ${stats.missedScams}. Mensagens legítimas marcadas como golpe: ${stats.falseAlarms}.`,
     'Antes de clicar: pausar, conferir o contexto e verificar por outro canal.',
   ].join('\n');

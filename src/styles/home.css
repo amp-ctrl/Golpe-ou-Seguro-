@@ -4,7 +4,7 @@
   padding: 28px 20px; justify-content: flex-start;
 }
 .start-screen { display: grid; grid-template-columns: minmax(0, 1fr); gap: 48px; flex: 1; }
-.start-content-column { display: flex; flex-direction: column; gap: 32px; min-width: 0; }
+.start-content-column { --home-column-gap: 24px; display: flex; flex-direction: column; gap: 32px; min-width: 0; }
 .start-intro { display: flex; flex-direction: column; align-items: flex-start; }
 .start-eyebrow {
   display: flex; align-items: center; gap: 10px; color: var(--color-text-secondary);
@@ -24,7 +24,7 @@
   line-height: 1.65; color: var(--color-text-secondary);
 }
 .start-description strong { color: var(--color-text-primary); font-weight: 500; }
-.start-action-group { display: grid; gap: 16px; width: 100%; max-width: 480px; }
+.start-action-group { display: grid; gap: 16px; width: 100%; max-width: none; }
 .start-action-group .session-size-options label { flex: 1; }
 .start-action-group .session-size-options label:has(input:checked) { border-color: var(--color-accent); background: var(--color-accent-subtle); }
 .start-action-group .session-size-picker legend { font-size: 0.875rem; }
@@ -36,17 +36,17 @@
 }
 .best-score-inline strong { color: var(--color-text-primary); font-family: var(--font-family-display); font-size: 1rem; font-weight: 600; }
 .best-score-inline strong span { font-family: var(--font-family-body); font-weight: 400; font-size: 0.8125rem; }
-.start-learning { display: grid; gap: 24px; }
-.how-it-works { padding-top: 20px; border-top: 1px solid var(--color-border-strong); }
+.start-learning { display: grid; gap: 0; }
+.how-it-works { padding-block: 20px; border-top: 1px solid var(--color-border-strong); }
 .how-it-works h2 { color: var(--color-text-secondary); font-size: 0.875rem; font-weight: 500; margin-bottom: 16px; }
-.how-it-works-steps { list-style: none; display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 20px; }
-.how-it-works-steps li { display: flex; flex-direction: column; gap: 6px; position: relative; padding-right: 8px; font-size: 0.8125rem; line-height: 1.5; }
+.how-it-works-steps, .bank-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); column-gap: var(--home-column-gap); }
+.how-it-works-steps { list-style: none; }
+.how-it-works-steps li { display: flex; flex-direction: column; gap: 6px; position: relative; padding-right: 0; min-width: 0; font-size: 0.8125rem; line-height: 1.5; }
 .step-number { font-family: var(--font-family-display); color: var(--color-accent); font-size: 0.75rem; }
-.step-arrow { position: absolute; top: 0; right: -10px; color: var(--color-text-secondary); }
-.bank-stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); border-top: 1px solid var(--color-border-strong); padding-top: 20px; }
-.bank-stats > div { display: flex; flex-direction: column; gap: 2px; padding-inline: 16px; border-left: 1px solid var(--color-border-strong); }
-.bank-stats > div:first-child { border-left: 0; padding-left: 0; }
-.bank-stats > div:last-child { padding-right: 0; }
+.step-arrow { position: absolute; top: 0; right: calc(var(--home-column-gap) * -0.5); transform: translateX(50%); color: var(--color-text-secondary); }
+.bank-stats { border-top: 1px solid var(--color-border-strong); padding-top: 20px; }
+.bank-stats > div { position: relative; display: flex; flex-direction: column; gap: 2px; min-width: 0; padding: 0; }
+.bank-stats > div + div::before { content: ''; position: absolute; inset-block: 0; left: calc(var(--home-column-gap) * -0.5); width: 1px; background: var(--color-border-strong); }
 .bank-stats dt { color: var(--color-text-secondary); font-size: 0.75rem; }
 .bank-stats dd { order: -1; font-family: var(--font-family-display); font-weight: 500; font-size: clamp(1.75rem, 2.3vw, 2.5rem); line-height: 1.2; letter-spacing: -0.04em; }
 
@@ -90,9 +90,8 @@
 @media (min-width: 1024px) {
   .app-container--start { width: calc(100% - 96px); max-width: 1280px; padding: 40px 0; }
   .start-screen { grid-template-columns: minmax(0, 1.15fr) minmax(0, 0.85fr); gap: clamp(40px, 4.2vw, 80px); min-height: calc(100dvh - 80px); }
-  .start-content-column { justify-content: space-between; gap: 32px; }
-  .start-learning { gap: 28px; }
-  .how-it-works-steps li { font-size: 0.9375rem; padding-right: 12px; }
+  .start-content-column { justify-content: space-evenly; gap: 24px; }
+  .how-it-works-steps li { font-size: 0.9375rem; }
   .bank-stats dt { font-size: 0.8125rem; }
   .example-carousel { justify-content: space-between; }
   .device-chassis--example { height: clamp(500px, 68dvh, 740px); }
@@ -100,3 +99,37 @@
 @media (prefers-reduced-motion: reduce) {
   .example-slide { animation: none; }
 }
+
+/* No desktop, as duas colunas compartilham o espaço restante após o cabeçalho. */
+@media (min-width: 1024px) and (min-height: 700px) {
+  .app-container--start {
+    display: grid; grid-template-rows: auto minmax(0, 1fr);
+    height: 100dvh; padding-block: 24px;
+  }
+  .app-container--start .learning-header { margin-bottom: 20px; padding-bottom: 12px; }
+  .app-container--start .start-screen { min-height: 0; height: 100%; gap: clamp(32px, 4vw, 64px); }
+  .app-container--start .start-content-column { gap: clamp(20px, 2.5dvh, 24px); min-height: 0; }
+  .app-container--start .start-eyebrow { margin-bottom: 14px; }
+  .app-container--start .brand-title { font-size: clamp(2.5rem, 3.5vw, 3.5rem); }
+  .app-container--start .brand-slogan { margin-top: 10px; font-size: clamp(1.25rem, 1.7vw, 1.5rem); }
+  .app-container--start .start-description { margin-top: 12px; font-size: 1rem; line-height: 1.55; }
+  .app-container--start .start-action-group { gap: 10px; }
+  .app-container--start .btn-start, .app-container--start .btn-guide { min-height: 52px; }
+  .app-container--start .start-learning { gap: 0; }
+  .app-container--start .how-it-works { padding-block: 16px; }
+  .app-container--start .how-it-works h2 { margin-bottom: 10px; }
+  .app-container--start .how-it-works-steps li { gap: 4px; font-size: 0.875rem; line-height: 1.45; }
+  .app-container--start .bank-stats { padding-top: 16px; }
+  .app-container--start .bank-stats dd { font-size: 2rem; }
+  .app-container--start .example-carousel { display: grid; grid-template-rows: auto minmax(0, 1fr) auto; justify-items: center; gap: 10px; min-height: 0; }
+  .app-container--start .example-swipe-area { height: 100%; min-height: 0; }
+  .app-container--start .device-chassis--example { height: 100%; min-height: 0; }
+  .app-container--start .example-carousel-controls { gap: 0; }
+  .app-container--start .example-help { margin-top: 4px; }
+}
+
+/* Controles e linhas divisórias usam toda a largura da coluna. */
+.start-action-group .session-size-options { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--home-column-gap); }
+.start-action-group .session-size-options label { min-width: 0; }
+.start-action-group .start-launch-actions { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+@media (max-width: 639px) { .start-content-column { --home-column-gap: 16px; } }

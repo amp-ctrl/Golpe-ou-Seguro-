@@ -36,7 +36,7 @@ describe('análise do resultado', () => {
   });
   it('compartilha apenas os dados reais da partida, inclusive se incompleta ou vazia', () => {
     expect(shareResult(session)).toContain('2/4 acertos (50%) · 20 pontos.');
-    expect(shareResult(session)).toContain('4 de 10 questões respondidas.');
+    expect(shareResult(session)).toContain('4 questões respondidas de 10.');
     expect(shareResult(session)).toContain('Golpes aceitos como seguros: 1.');
     expect(shareResult(session)).toContain('\n');
     const empty = shareResult({ ...session, answers: [] });

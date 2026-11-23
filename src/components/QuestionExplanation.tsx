@@ -1,22 +1,21 @@
 import type { Challenge } from '../data/challenges';
 
-export function QuestionExplanation({ challenge }: { challenge: Challenge }) {
-  const signals = challenge.redFlags.length ? challenge.redFlags : [
-    'Contexto da mensagem reconhecido', 'Sem pedido de senha ou código a terceiros',
-  ];
+export function QuestionExplanation({ challenge, variant = 'training' }: { challenge: Challenge; variant?: 'training' | 'review' }) {
+  const review = variant === 'review';
+  const signals = challenge.isScam ? challenge.redFlags : challenge.observedSignals ?? [];
   return (
-    <div className="question-explanation">
-      <p className="explanation-copy">{challenge.explanation}</p>
-      <div>
-        <h3>{challenge.isScam ? 'Sinais de alerta' : 'Sinais de confiança neste cenário'}</h3>
-        <ul className="signal-chips">
-          {signals.map((signal) => <li className={`signal-chip ${challenge.isScam ? 'signal-chip--alert' : ''}`} key={signal}>{signal}</li>)}
+    <div className={`question-explanation${review ? ' question-explanation--review' : ''}`}>
+      <p className="explanation-copy">{review ? challenge.reviewSummary : challenge.explanation}</p>
+      {signals.length > 0 && <section>
+        <h3>O que observar</h3>
+        <ul className={review ? 'observed-signals' : 'signal-chips'}>
+          {signals.map((signal) => <li className={review ? undefined : `signal-chip ${challenge.isScam ? 'signal-chip--alert' : ''}`} key={signal}>{signal}</li>)}
         </ul>
-      </div>
-      <div className="verification-block">
-        <h3>Como confirmar</h3>
+      </section>}
+      <section className={review ? 'review-action' : 'verification-block'}>
+        <h3>Como agir</h3>
         <p>{challenge.howToVerify}</p>
-      </div>
+      </section>
     </div>
   );
 }

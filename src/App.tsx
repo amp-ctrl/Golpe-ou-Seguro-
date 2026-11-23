@@ -1,4 +1,6 @@
-import { useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
+import { GuideScreen } from './components/GuideScreen';
+import { LearningNavigation } from './components/LearningNavigation';
 import { INITIAL_CHALLENGES, type Category, type Challenge } from './data/challenges';
 import { POINTS_PER_CORRECT_ANSWER, POINTS_PER_WRONG_ANSWER } from './config';
 import { storage } from './services/storage';
@@ -8,11 +10,22 @@ import { StartScreen } from './components/StartScreen';
 import { PlayingScreen } from './components/PlayingScreen';
 import { ResultScreen } from './components/ResultScreen';
 
-type Screen = 'start' | 'playing' | 'summary';
+type Screen = 'start' | 'playing' | 'summary' | 'guide';
 interface ActiveSession { id: string; startedAt: string; deck: Challenge[]; focusCategories: Category[] }
 
 export default function App() {
   const [screen, setScreen] = useState<Screen>('start');
+  const previousScreen = useRef(screen);
+  useEffect(() => {
+    if (previousScreen.current !== screen) {
+      if (screen === 'start' || screen === 'guide') {
+        window.scrollTo(0, 0);
+        document.querySelector<HTMLElement>('main h1')?.focus({ preventScroll: true });
+      }
+      previousScreen.current = screen;
+    }
+  }, [screen]);
+  const navigate = (area: 'simulator' | 'guide') => { setError(''); setScreen(area === 'guide' ? 'guide' : 'start'); };
   const [bestScore, setBestScore] = useState(() => storage.getBestScore());
   const [sessionSize, setSessionSize] = useState<SessionSize>(10);
   const [error, setError] = useState('');
@@ -61,9 +74,11 @@ export default function App() {
   };
   return (
     <div className={`app-container app-container--${screen}`}>
-      {screen === 'start' && <StartScreen bestScore={bestScore} sessionSize={sessionSize} onSessionSizeChange={setSessionSize} onStart={() => start()} error={error} />}
+      {(screen === 'start' || screen === 'guide') && <LearningNavigation active={screen === 'guide' ? 'guide' : 'simulator'} onNavigate={navigate} />}
+      {screen === 'guide' && <GuideScreen />}
+      {screen === 'start' && <StartScreen bestScore={bestScore} sessionSize={sessionSize} onSessionSizeChange={setSessionSize} onStart={() => start()} onGuide={() => navigate('guide')} error={error} />}
       {screen === 'playing' && session && current && <PlayingScreen challenge={current} index={index} size={session.deck.length} answeredCount={answers.length} score={score} answer={answers[index]} focused={session.focusCategories.length > 0} focusCount={session.deck.filter((item) => session.focusCategories.includes(item.category)).length} onAnswer={answer} onNext={next} onQuit={finish} />}
-      {screen === 'summary' && finished && <ResultScreen session={finished} bestScore={bestScore} history={storage.getSessionHistory()} lifetimeStats={storage.getCategoryStats()} onRestart={() => start()} onFocused={(categories) => start(categories)} onHome={() => { setError(''); setScreen('start'); }} error={error} />}
+      {screen === 'summary' && finished && <ResultScreen session={finished} bestScore={bestScore} lifetimeStats={storage.getCategoryStats()} onRestart={() => start()} onFocused={(categories) => start(categories)} onHome={() => { setError(''); setScreen('start'); }} error={error} />}
     </div>
   );
 }
